@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Comfortaa:wght@400;700&family=Inter:wght@400;700&family=Jura:wght@400;700&family=Kelly+Slab&family=Lobster&family=Marck+Script&family=Montserrat:wght@400;700&family=Neucha&family=Open+Sans:wght@400;700&family=Oswald:wght@400;700&family=PT+Sans:wght@400;700&family=Philosopher:wght@400;700&family=Press+Start+2P&family=Raleway:wght@400;700&family=Roboto:wght@400;700&family=Rubik+Mono+One&family=Russo+One&family=Ubuntu:wght@400;700&family=Yanone+Kaffeesatz:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        /* Шахматный фон для наглядной демонстрации прозрачности */
         .checkerboard-bg {
             background-color: #121214;
             background-image: 
@@ -21,18 +20,16 @@
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
         
-        /* Плавное свечение для кнопки скачивания */
         .pulse-glow {
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
             animation: pulse 2s infinite;
         }
         @keyframes pulse {
-            0% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.1); }
-            50% { box-shadow: 0 0 25px rgba(255, 255, 255, 0.3); }
-            100% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.1); }
+            0% { box-shadow: 0 0 15px rgba(6, 182, 212, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(6, 182, 212, 0.6); }
+            100% { box-shadow: 0 0 15px rgba(6, 182, 212, 0.3); }
         }
 
-        /* Кнопка доната */
         .donate-btn {
             background: linear-gradient(135deg, #ff7e5f, #feb47b);
             transition: all 0.3s ease;
@@ -46,14 +43,12 @@
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
         
-        /* Стили для выпадающего списка шрифтов */
         select option {
             background-color: #18181b;
             color: #ffffff;
             padding: 4px;
         }
 
-        /* Вертикальный ползунок масштабирования (Зум) */
         .zoom-slider {
             -webkit-appearance: slider-vertical;
             appearance: slider-vertical;
@@ -63,13 +58,11 @@
             border-radius: 10px;
         }
 
-        /* Стили скроллбара для предпросмотра */
         .custom-scrollbar::-webkit-scrollbar { width: 10px; height: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #0a0a0c; border-radius: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; border-radius: 8px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 8px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #52525b; }
         
-        /* Стили для маркеров изменения размера (resize handles) */
         .resize-handle {
             fill: white;
             stroke: #00f0ff;
@@ -83,6 +76,8 @@
     </style>
 </head>
 <body class="bg-[#0f0f11] text-zinc-100 min-h-screen font-sans flex flex-col justify-between overflow-x-hidden">
+
+    <input type="file" id="image-upload-input" accept="image/png, image/jpeg, image/gif, image/webp" class="hidden">
 
     <header class="border-b border-zinc-800 bg-black/40 p-4 backdrop-blur-md z-10 relative">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
@@ -101,15 +96,22 @@
                 </div>
             </div>
 
-            <div class="flex gap-3">
-                <button id="instruction-btn" class="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-lg transition-all text-sm tracking-wide border border-zinc-700">
+            <div class="flex gap-3 flex-wrap items-center">
+                <!-- Контейнер для виджета авторизации Telegram -->
+                <div id="auth-container" class="flex items-center min-h-[40px]"></div>
+
+                <button id="instruction-btn" class="px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-lg transition-all text-xs tracking-wide border border-zinc-700 ml-2">
                     ИНСТРУКЦИЯ
                 </button>
-                <a id="download-btn" href="#" class="opacity-50 pointer-events-none px-6 py-3 bg-white hover:bg-zinc-200 text-black font-black rounded-lg transition-all text-sm tracking-wide pulse-glow flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                <a id="download-btn" href="#" class="px-4 py-2.5 bg-zinc-200 hover:bg-white text-black font-black rounded-lg transition-all text-xs tracking-wide flex items-center gap-2">
+                    СТАТИКА (PNG)
+                </a>
+                <a id="download-html-btn" href="#" class="px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-black rounded-lg transition-all text-xs tracking-wide pulse-glow flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    СКАЧАТЬ ПРОЗРАЧНЫЙ PNG
+                    АНИМАЦИЯ (HTML)
                 </a>
             </div>
         </div>
@@ -119,7 +121,7 @@
         
         <div class="flex-1 w-full flex flex-col items-center select-none h-[78vh]">
             <h2 class="text-lg font-bold text-zinc-300 mb-3 flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
                 Предпросмотр (все неподсвеченные зоны прозрачны)
             </h2>
             
@@ -132,39 +134,22 @@
                     <span id="zoom-val" class="text-[10px] text-zinc-300 font-bold mt-2 bg-zinc-800 px-2 py-1 rounded border border-zinc-700">35%</span>
                 </div>
 
-                <div class="flex-1 h-full overflow-auto bg-[#0a0a0c] border-4 border-zinc-800 rounded-2xl p-4 custom-scrollbar relative flex items-start justify-center">
-                    
-                    <div id="preview-container" class="checkerboard-bg shadow-[0_0_30px_rgba(0,0,0,0.8)] relative flex-shrink-0 transition-all duration-75" style="width: 378px; height: 672px;">
+                <div class="flex-1 h-full overflow-auto p-4 custom-scrollbar relative flex items-start justify-center">
+                    <div id="preview-container" class="checkerboard-bg relative flex-shrink-0 transition-all duration-75 border border-white/5 shadow-2xl" style="width: 378px; height: 672px;">
                         <svg id="overlay-svg" class="w-full h-full absolute inset-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920">
-                            </svg>
+                        </svg>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="w-full lg:w-[420px] bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 space-y-6 backdrop-blur-sm flex flex-col h-[78vh] overflow-y-auto custom-scrollbar">
+        <div class="w-full lg:w-[420px] bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 space-y-6 backdrop-blur-sm flex flex-col h-[78vh] overflow-y-auto custom-scrollbar relative">
             
             <div class="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4 shrink-0">
                 <h3 class="font-black text-white text-sm uppercase tracking-wider flex items-center gap-2">
-                    Глобальный стиль
+                    Добавление элементов
                 </h3>
-                <div class="space-y-4">
-                    <div class="space-y-2">
-                        <div class="flex justify-between text-xs font-mono text-zinc-400">
-                            <span>Толщина всех рамок</span>
-                            <span id="border-val" class="text-white font-bold">3 px</span>
-                        </div>
-                        <input id="border-slider" type="range" min="1" max="20" value="3" class="w-full accent-white cursor-pointer bg-zinc-800 rounded-lg h-1.5 appearance-none">
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4 shrink-0">
-                <h3 class="font-black text-white text-sm uppercase tracking-wider flex items-center gap-2">
-                    Управление элементами
-                </h3>
-                
-                <div class="grid grid-cols-4 gap-2">
+                <div class="grid grid-cols-3 gap-2">
                     <button id="add-rect-btn" class="bg-zinc-800 hover:bg-zinc-700 text-white text-[10px] font-bold py-2 rounded-lg transition-colors border border-zinc-700 uppercase">
                         + Рамка
                     </button>
@@ -174,34 +159,72 @@
                     <button id="add-txt-btn" class="bg-zinc-800 hover:bg-cyan-900/50 hover:text-cyan-400 text-white text-[10px] font-bold py-2 rounded-lg transition-colors border border-zinc-700 hover:border-cyan-500/50 uppercase">
                         + Текст
                     </button>
-                    <button id="remove-btn" class="bg-red-900/30 hover:bg-red-900/50 text-red-400 text-[10px] font-bold py-2 rounded-lg transition-colors border border-red-900/50 uppercase">
-                        Удалить
+                    <button id="add-line-btn" class="col-span-1 bg-zinc-800 hover:bg-zinc-700 text-white text-[10px] font-bold py-2 rounded-lg transition-colors border border-zinc-700 uppercase">
+                        + Полоса
+                    </button>
+                    <button id="add-img-btn" class="col-span-2 bg-gradient-to-r from-zinc-800 to-zinc-700 hover:from-zinc-700 hover:to-zinc-600 text-white text-[10px] font-bold py-2 rounded-lg transition-colors border border-zinc-600 uppercase flex justify-center items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        + КАРТИНКА (GIF/PNG)
                     </button>
                 </div>
+            </div>
 
-                <div id="frame-props" class="space-y-3 opacity-50 pointer-events-none transition-opacity bg-black/20 p-3 rounded-lg border border-white/5">
+            <div id="dynamic-panel" class="shrink-0 flex flex-col gap-6">
+                
+                <div id="empty-state-info" class="flex flex-col items-center justify-center bg-black/30 border border-white/5 rounded-xl p-8 text-center h-full transition-opacity">
+                    <div class="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(6,182,212,0.1)] border border-zinc-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-black text-lg mb-2">ВЫДЕЛИТЕ ЭЛЕМЕНТ<br><span class="text-xs text-zinc-400 font-normal">для редактирования</span></h3>
+                    <p class="text-[11px] text-zinc-500 leading-relaxed mt-2">
+                        <b>Neuro Grafic</b> — это мощный редактор оверлеев. Вы можете добавлять рамки, текст и виджеты.<br><br>Кликните по любому элементу на предпросмотре, чтобы открыть панель его свойств.
+                    </p>
+                    
+                    <div class="w-full mt-6 text-left bg-zinc-900/50 p-3 rounded-lg border border-zinc-800">
+                        <div class="flex justify-between text-[10px] font-mono text-zinc-400 mb-2">
+                            <span>Глобальная толщина рамок</span>
+                            <span id="border-val" class="text-white font-bold">3 px</span>
+                        </div>
+                        <input id="border-slider" type="range" min="1" max="20" value="3" class="w-full accent-cyan-400 cursor-pointer bg-zinc-800 rounded-lg h-1.5 appearance-none">
+                    </div>
+                </div>
+
+                <div id="frame-props" class="space-y-4 opacity-0 pointer-events-none hidden transition-opacity bg-black/20 p-4 rounded-xl border border-white/5">
                     
                     <div class="flex justify-between items-center mb-2">
-                        <h4 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Свойства элемента</h4>
+                        <h4 class="text-[10px] font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full"></span>
+                            Свойства элемента
+                        </h4>
                         <div class="flex gap-1">
-                            <button id="z-up" class="w-6 h-6 bg-zinc-800 rounded hover:bg-zinc-700 text-white flex items-center justify-center text-xs border border-zinc-700" title="На передний план">↑</button>
-                            <button id="z-down" class="w-6 h-6 bg-zinc-800 rounded hover:bg-zinc-700 text-white flex items-center justify-center text-xs border border-zinc-700" title="На задний план">↓</button>
+                            <button id="z-up" class="w-7 h-7 bg-zinc-800 rounded hover:bg-zinc-700 text-white flex items-center justify-center text-sm border border-zinc-700" title="На передний план">↑</button>
+                            <button id="z-down" class="w-7 h-7 bg-zinc-800 rounded hover:bg-zinc-700 text-white flex items-center justify-center text-sm border border-zinc-700" title="На задний план">↓</button>
                         </div>
                     </div>
                     
                     <div class="flex flex-col gap-3">
-                        <div class="grid grid-cols-2 gap-2">
+                        <div class="grid grid-cols-2 gap-2" id="color-glow-section">
                             <div class="flex items-center gap-2 bg-zinc-900/80 p-2 rounded border border-zinc-700">
                                 <label class="text-[10px] text-zinc-400 font-mono">Цвет:</label>
                                 <input type="color" id="frame-color" value="#ffffff" class="w-full h-6 rounded cursor-pointer bg-transparent outline-none">
                             </div>
                             <div class="flex flex-col justify-center bg-zinc-900/80 p-2 rounded border border-zinc-700">
                                 <div class="flex justify-between text-[10px] text-zinc-400 font-mono mb-1">
-                                    <span>Свечение:</span>
+                                    <span>Неон:</span>
                                     <span id="glow-val" class="text-white font-bold">12</span>
                                 </div>
-                                <input id="glow-slider" type="range" min="0" max="30" value="12" class="w-full accent-white cursor-pointer h-1.5 appearance-none bg-zinc-700 rounded">
+                                <input id="glow-slider" type="range" min="0" max="30" value="12" class="w-full accent-cyan-400 cursor-pointer h-1.5 appearance-none bg-zinc-700 rounded">
                             </div>
+                        </div>
+
+                        <div class="flex flex-col justify-center bg-zinc-900/80 p-2 rounded border border-zinc-700 w-full">
+                            <div class="flex justify-between text-[10px] text-zinc-400 font-mono mb-1">
+                                <span>Тень (Drop Shadow):</span>
+                                <span id="shadow-val" class="text-white font-bold">0</span>
+                            </div>
+                            <input id="shadow-slider" type="range" min="0" max="30" value="0" class="w-full accent-purple-500 cursor-pointer h-1.5 appearance-none bg-zinc-700 rounded">
                         </div>
                         
                         <div id="prop-rect" class="space-y-3">
@@ -215,17 +238,16 @@
                                     <input type="number" id="frame-h" class="w-full bg-transparent text-white text-xs font-mono focus:outline-none">
                                 </div>
                             </div>
-                            <div class="flex items-center justify-between bg-zinc-900/80 p-2 rounded border border-zinc-700">
-                                <label class="text-[10px] text-zinc-400 font-mono">Скругление углов:</label>
-                                <input type="range" id="frame-rx" min="0" max="500" class="w-24 accent-white h-1 cursor-pointer">
+                            <div class="flex items-center justify-between bg-zinc-900/80 p-2 rounded border border-zinc-700" id="rx-container">
+                                <label class="text-[10px] text-zinc-400 font-mono">Скругление:</label>
+                                <input type="range" id="frame-rx" min="0" max="500" class="w-24 accent-cyan-400 h-1 cursor-pointer">
                             </div>
                             
-                            <div class="flex flex-col gap-2 bg-zinc-900/80 p-2 rounded border border-zinc-700 mt-2">
+                            <div id="rec-wrapper" class="flex flex-col gap-2 bg-zinc-900/80 p-2 rounded border border-zinc-700 mt-2">
                                 <label class="flex items-center gap-2 cursor-pointer text-xs text-white font-bold mb-1">
                                     <input type="checkbox" id="frame-rec" class="accent-red-500 w-4 h-4 rounded cursor-pointer">
                                     Включить индикатор REC
                                 </label>
-                                
                                 <div id="rec-settings" class="grid grid-cols-2 gap-2 transition-opacity">
                                     <div class="flex flex-col gap-1">
                                         <label class="text-[10px] text-zinc-400">Позиция:</label>
@@ -237,7 +259,7 @@
                                         </select>
                                     </div>
                                     <div class="flex flex-col gap-1">
-                                        <label class="text-[10px] text-zinc-400">Размер (Множитель):</label>
+                                        <label class="text-[10px] text-zinc-400">Множитель:</label>
                                         <input type="number" id="frame-rec-size" min="0.5" max="5" step="0.1" value="1" class="w-full bg-zinc-800 text-white text-[10px] p-1.5 rounded outline-none border border-zinc-700">
                                     </div>
                                 </div>
@@ -280,15 +302,19 @@
                         </div>
 
                         <div class="grid grid-cols-2 gap-2 mt-1">
-                            <button id="align-center-x" class="text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 py-1.5 rounded transition-colors border border-zinc-700">↔ По центру X</button>
-                            <button id="align-center-y" class="text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 py-1.5 rounded transition-colors border border-zinc-700">↕ По центру Y</button>
+                            <button id="align-center-x" class="text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 py-2 rounded transition-colors border border-zinc-700">↔ По центру X</button>
+                            <button id="align-center-y" class="text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 py-2 rounded transition-colors border border-zinc-700">↕ По центру Y</button>
                         </div>
+
+                        <button id="remove-btn" class="w-full mt-2 bg-red-900/30 hover:bg-red-900/50 text-red-400 text-[10px] font-bold py-2 rounded-lg transition-colors border border-red-900/50 uppercase">
+                            Удалить выбранное
+                        </button>
                     </div>
 
-                    <div class="text-[10px] text-zinc-400 font-mono leading-relaxed mt-3 border-t border-zinc-800/80 pt-2">
-                        • Тяните за рамку или текст для перемещения<br>
-                        • Тяните за углы рамок для изменения размера<br>
-                        • Используйте стрелки клавиатуры для сдвига
+                    <div class="text-[9px] text-zinc-500 font-mono leading-relaxed mt-3 border-t border-zinc-800/80 pt-2">
+                        • <b>Зажмите фон</b> для массового выделения<br>
+                        • <b>Shift + Клик</b> = добавить в группу<br>
+                        • <b>Shift + Растягивание</b> = сохранить пропорции
                     </div>
                 </div>
             </div>
@@ -306,43 +332,60 @@
     </main>
 
     <footer class="border-t border-zinc-900 bg-black/60 p-4 text-center text-xs text-zinc-500 relative z-10">
-        Neuro Grafic © 2026. Полностью автономный рендеринг в браузере by <a href="https://t.me/WZ_Casper" target="_blank" class="text-blue-400 hover:underline">亗 Casper</a>
+        Neuro Grafic © 2026. Полностью автономный рендеринг в браузере by <a href="https://t.me/WZ_Casper" target="_blank" class="text-cyan-400 hover:underline">亗 Casper</a>
     </footer>
 
-    <!-- Модальное окно с инструкцией -->
     <div id="instruction-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-2xl w-full p-8 shadow-2xl relative transform scale-95 transition-transform duration-300" id="instruction-content">
+        <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-3xl w-full p-8 shadow-2xl relative transform scale-95 transition-transform duration-300 overflow-y-auto max-h-[90vh] custom-scrollbar" id="instruction-content">
             <button id="close-modal-btn" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 rounded-full text-zinc-400 hover:text-white transition-colors">
                 ✕
             </button>
             
-            <h2 class="text-2xl font-black text-white mb-6 border-b border-zinc-800 pb-4">Как добавить оверлей на стрим</h2>
+            <h2 class="text-2xl font-black text-white mb-6 border-b border-zinc-800 pb-4">Установка оверлея на стрим</h2>
             
-            <div class="text-zinc-300 space-y-5 text-sm leading-relaxed">
-                <div class="flex gap-4 items-start">
-                    <div class="w-8 h-8 rounded-full bg-cyan-900/50 text-cyan-400 flex items-center justify-center font-bold shrink-0 border border-cyan-500/30">1</div>
-                    <div>
-                        <strong class="text-white block text-base mb-1">Создайте и скачайте</strong>
-                        Настройте рамки, цвета и свечение в этом редакторе. После этого нажмите кнопку <span class="bg-white text-black px-2 py-0.5 rounded text-xs font-bold mx-1">СКАЧАТЬ ПРОЗРАЧНЫЙ PNG</span>. Изображение сохранится на ваш компьютер без заднего фона.
+            <div class="text-zinc-300 space-y-8 text-sm leading-relaxed">
+                
+                <div>
+                    <h3 class="text-lg font-bold text-cyan-400 mb-3 flex items-center gap-2"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg> Вариант 1: Установка АНИМАЦИИ (Формат HTML)</h3>
+                    <p class="mb-3 text-zinc-400">Это лучший формат. Он сохраняет неоновые свечения, плавные анимации (мигание REC) и любые загруженные вами GIF-файлы с идеальной прозрачностью без тормозов.</p>
+                    
+                    <div class="space-y-4 pl-4 border-l-2 border-zinc-800">
+                        <div>
+                            <strong class="text-white block">OBS Studio:</strong>
+                            1. Нажмите <strong class="text-white">+</strong> в панели Источников и выберите <strong class="text-white">Браузер (Browser)</strong>.<br>
+                            2. Поставьте галочку <strong class="text-white">Локальный файл</strong> и укажите путь к скачанному <code>animated_overlay.html</code>.<br>
+                            3. Укажите Ширину: <code>1080</code> и Высоту: <code>1920</code>.
+                        </div>
+                        <div>
+                            <strong class="text-white block">TikTok Live Studio:</strong>
+                            1. Нажмите <strong class="text-white">Добавить источник</strong> и выберите <strong class="text-white">Ссылка (Link)</strong>.<br>
+                            2. Нажмите на значок папки (или выберите локальный файл), чтобы указать путь к вашему HTML файлу.<br>
+                            3. Задайте разрешение источника 1080x1920.
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex gap-4 items-start">
-                    <div class="w-8 h-8 rounded-full bg-purple-900/50 text-purple-400 flex items-center justify-center font-bold shrink-0 border border-purple-500/30">2</div>
-                    <div>
-                        <strong class="text-white block text-base mb-1">Добавьте в TikTok Live Studio / OBS</strong>
-                        Откройте вашу программу для стриминга. В панели источников (Sources) нажмите кнопку <strong class="text-white">+ Добавить источник</strong> и выберите пункт <strong class="text-white">Изображение (Image)</strong>.
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2"><svg class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> Вариант 2: Установка СТАТИКИ (Формат PNG)</h3>
+                    <p class="mb-3 text-zinc-400">Обычная картинка без фона. Подойдет, если вам не нужны анимации кнопок REC или GIF-файлов.</p>
+                    
+                    <div class="space-y-4 pl-4 border-l-2 border-zinc-800">
+                        <div>
+                            <strong class="text-white block">OBS Studio:</strong>
+                            1. Нажмите <strong class="text-white">+</strong> в Источниках и выберите <strong class="text-white">Изображение (Image)</strong>.<br>
+                            2. Выберите скачанный файл <code>stream_vertical_overlay.png</code>.
+                        </div>
+                        <div>
+                            <strong class="text-white block">TikTok Live Studio:</strong>
+                            1. Нажмите <strong class="text-white">Добавить источник</strong> -> <strong class="text-white">Изображение (Image)</strong>.<br>
+                            2. Выберите вашу сохраненную PNG картинку оверлея.
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex gap-4 items-start">
-                    <div class="w-8 h-8 rounded-full bg-emerald-900/50 text-emerald-400 flex items-center justify-center font-bold shrink-0 border border-emerald-500/30">3</div>
-                    <div>
-                        <strong class="text-white block text-base mb-1">Поместите на передний план (Важно!)</strong>
-                        Выберите скачанный файл <code class="bg-zinc-800 px-1 py-0.5 rounded text-xs">stream_vertical_overlay.png</code>. Обязательно перетащите этот источник в <strong>САМЫЙ ВЕРХ</strong> списка слоёв! 
-                        <br><br>
-                        <span class="text-zinc-400 italic">Это необходимо для того, чтобы рамки оверлея красиво накладывались поверх вашей веб-камеры, игры и захвата экрана, скрывая их неровные края, как и было задумано в редакторе.</span>
-                    </div>
+                <div class="bg-red-900/20 border border-red-900/50 p-4 rounded-lg">
+                    <strong class="text-red-400 block text-base mb-1">🔥 ВАЖНО ДЛЯ ВСЕХ ПРОГРАММ:</strong>
+                    Обязательно перетащите слой с оверлеем в <strong>САМЫЙ ВЕРХ</strong> списка ваших источников! Только так его рамки скроют неровные края веб-камеры и игры.
                 </div>
             </div>
             
@@ -357,12 +400,12 @@
     <script>
         window.addEventListener('load', () => {
             const svgOverlay = document.getElementById('overlay-svg');
-            const downloadBtn = document.getElementById('download-btn');
+            const downloadPngBtn = document.getElementById('download-btn');
+            const downloadHtmlBtn = document.getElementById('download-html-btn');
             const previewZoom = document.getElementById('preview-zoom');
             const zoomVal = document.getElementById('zoom-val');
             const previewContainer = document.getElementById('preview-container');
             
-            // Настройки глобальные
             const borderSlider = document.getElementById('border-slider');
             const borderVal = document.getElementById('border-val');
 
@@ -370,20 +413,142 @@
             
             let globalStrokeWidth = parseInt(borderSlider.value) || 3;
 
-            // Базовые элементы с добавленным свойством glow для каждого
-            let elements = [
-                { id: 'webcam', type: 'rect', x: 290, y: 150, w: 500, h: 500, color: '#00f0ff', rx: 250, rec: true, recPos: 'tl', recSize: 1.2, glow: 15 }, 
-                { id: 'game', type: 'rect', x: 40, y: 700, w: 1000, h: 562, color: '#ffffff', rx: 12, rec: false, recPos: 'tl', recSize: 1, glow: 10 }, 
-                { id: 'title', type: 'text', x: 540, y: 1350, text: 'МОЙ СТРИМ', color: '#ff0055', fontSize: 60, fontFamily: 'Russo One', glow: 15 },
-                { id: 'social', type: 'text', x: 540, y: 1440, text: '@wz_casper', color: '#cccccc', fontSize: 30, fontFamily: 'Inter', glow: 5 }
+            // Начальные элементы
+            let defaultElements = [
+                { id: 'webcam', type: 'rect', isCircle: false, x: 290, y: 150, w: 500, h: 500, color: '#00f0ff', rx: 4, rec: true, recPos: 'tl', recSize: 1.2, glow: 15, shadow: 0 }, 
+                { id: 'game', type: 'rect', isCircle: false, x: 40, y: 700, w: 1000, h: 562, color: '#ffffff', rx: 12, rec: false, recPos: 'tl', recSize: 1, glow: 10, shadow: 0 }, 
+                { id: 'title', type: 'text', x: 540, y: 1350, text: 'МОЙ СТРИМ', color: '#ff0055', fontSize: 60, fontFamily: 'Russo One', glow: 15, shadow: 0 },
+                { id: 'social', type: 'text', x: 540, y: 1440, text: '@wz_casper', color: '#cccccc', fontSize: 30, fontFamily: 'Inter', glow: 5, shadow: 0 }
             ];
 
-            let selectedFrameId = null;
+            let elements = [...defaultElements];
+
+            // ----------------------------------------------------
+            // АВТОРИЗАЦИЯ ЧЕРЕЗ TELEGRAM И СОХРАНЕНИЯ
+            // ----------------------------------------------------
+            let isLoggedIn = false;
+            let BOT_USERNAME = "YOUR_BOT_USERNAME"; // <-- Замените на юзернейм вашего бота из @BotFather без @
+
+            window.onTelegramAuth = function(user) {
+                localStorage.setItem('ng_telegram_user', JSON.stringify(user));
+                isLoggedIn = true;
+                renderUserProfile(user);
+                loadData();
+                saveData();
+            };
+
+            function renderUserProfile(user) {
+                const authContainer = document.getElementById('auth-container');
+                if (!authContainer) return;
+                
+                const displayName = user.first_name || user.username || 'Пользователь';
+                const avatar = user.photo_url 
+                    ? `<img src="${user.photo_url}" class="w-6 h-6 rounded-full border border-cyan-400 object-cover">` 
+                    : `<span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold text-[10px] flex items-center justify-center border border-cyan-500/40">${displayName.charAt(0).toUpperCase()}</span>`;
+                
+                authContainer.innerHTML = `
+                    <div class="flex items-center gap-2 bg-zinc-800/90 px-3 py-1.5 rounded-lg border border-cyan-500/40 text-xs text-white shadow-md">
+                        ${avatar}
+                        <span class="font-bold text-cyan-300 max-w-[120px] truncate">${displayName}</span>
+                        <button id="logout-btn" class="ml-1 text-zinc-400 hover:text-red-400 font-bold transition-colors text-sm px-1" title="Выйти">✕</button>
+                    </div>
+                `;
+
+                document.getElementById('logout-btn')?.addEventListener('click', () => {
+                    localStorage.removeItem('ng_telegram_user');
+                    localStorage.removeItem('ng_saved_elements');
+                    isLoggedIn = false;
+                    checkAuth();
+                });
+            }
+
+            function checkAuth() {
+                const savedUser = localStorage.getItem('ng_telegram_user');
+                if (savedUser) {
+                    try {
+                        const user = JSON.parse(savedUser);
+                        isLoggedIn = true;
+                        renderUserProfile(user);
+                        loadData();
+                    } catch (e) {
+                        initTelegramWidget();
+                    }
+                } else {
+                    initTelegramWidget();
+                }
+            }
+
+            function initTelegramWidget() {
+                const authContainer = document.getElementById('auth-container');
+                if (!authContainer) return;
+                authContainer.innerHTML = '';
+
+                if (BOT_USERNAME === "YOUR_BOT_USERNAME") {
+                    authContainer.innerHTML = `
+                        <button onclick="promptBotName()" class="px-3 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg transition-all text-xs tracking-wide flex items-center gap-2 border border-sky-400/50 shadow-lg">
+                            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.69-.52.36-1 .53-1.42.52-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.24.37-.49 1.02-.75 3.99-1.74 6.66-2.89 8.01-3.45 3.82-1.59 4.61-1.87 5.13-1.88.11 0 .37.03.54.17.14.12.18.28.2.45-.01.07.01.21 0 .33z"/></svg>
+                            Войти через Telegram
+                        </button>
+                    `;
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = "https://telegram.org/js/telegram-widget.js?22";
+                script.setAttribute('data-telegram-login', BOT_USERNAME);
+                script.setAttribute('data-size', 'medium');
+                script.setAttribute('data-radius', '8');
+                script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+                script.setAttribute('data-request-access', 'write');
+                script.async = true;
+
+                authContainer.appendChild(script);
+            }
+
+            window.promptBotName = function() {
+                const name = prompt("Введите username вашего Telegram бота из @BotFather (без @):", "");
+                if (name) {
+                    BOT_USERNAME = name.trim();
+                    initTelegramWidget();
+                }
+            };
+
+            function saveData() {
+                if (isLoggedIn) {
+                    localStorage.setItem('ng_saved_elements', JSON.stringify(elements));
+                    localStorage.setItem('ng_global_stroke', globalStrokeWidth);
+                }
+            }
+
+            function loadData() {
+                const saved = localStorage.getItem('ng_saved_elements');
+                const savedStroke = localStorage.getItem('ng_global_stroke');
+                if (saved) {
+                    try {
+                        elements = JSON.parse(saved);
+                    } catch (e) { console.error('Error parsing save', e); }
+                }
+                if (savedStroke) {
+                    globalStrokeWidth = parseInt(savedStroke);
+                    borderSlider.value = globalStrokeWidth;
+                    borderVal.innerText = `${globalStrokeWidth} px`;
+                }
+            }
+
+            let selectedElementIds = new Set();
+            let dragOffsets = new Map();
+            let dragAnchorId = null;
+            let dragStartCoords = null;
+            
             let dragFrame = null;
             let resizeHandle = null; 
             let offsetX = 0, offsetY = 0;
             let renderTimeout;
             const handleSize = 12;
+
+            let isSelecting = false;
+            let selectionStart = {x: 0, y: 0};
+            let selectionBoxState = { active: false, x: 0, y: 0, w: 0, h: 0 };
 
             // Модальное окно
             const modal = document.getElementById('instruction-modal');
@@ -392,54 +557,32 @@
             const closeModalBtn = document.getElementById('close-modal-btn');
             const understandBtn = document.getElementById('understand-btn');
 
-            function openModal() {
-                modal.classList.remove('hidden');
-                // Небольшая задержка для анимации opacity
-                setTimeout(() => {
-                    modal.classList.remove('opacity-0');
-                    modalContent.classList.remove('scale-95');
-                }, 10);
-            }
-
-            function closeModal() {
-                modal.classList.add('opacity-0');
-                modalContent.classList.add('scale-95');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                }, 300);
-            }
+            function openModal() { modal.classList.remove('hidden'); setTimeout(() => { modal.classList.remove('opacity-0'); modalContent.classList.remove('scale-95'); }, 10); }
+            function closeModal() { modal.classList.add('opacity-0'); modalContent.classList.add('scale-95'); setTimeout(() => { modal.classList.add('hidden'); }, 300); }
 
             openModalBtn.addEventListener('click', openModal);
             closeModalBtn.addEventListener('click', closeModal);
             understandBtn.addEventListener('click', closeModal);
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) closeModal();
-            });
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
-            // Логика Зума (Масштабирования предпросмотра)
             previewZoom.addEventListener('input', (e) => {
                 const z = parseFloat(e.target.value);
                 zoomVal.innerText = Math.round(z * 100) + '%';
-                // Т.к. базовое разрешение 1080x1920, пропорционально меняем размер контейнера
                 previewContainer.style.width = (1080 * z) + 'px';
                 previewContainer.style.height = (1920 * z) + 'px';
             });
-            // Инициализация зума
             previewZoom.dispatchEvent(new Event('input'));
 
-            // Получение точных координат мыши на SVG не зависимо от Зума
             function getMouseCoords(evt) {
                 const pt = svgOverlay.createSVGPoint();
                 pt.x = evt.clientX;
                 pt.y = evt.clientY;
-                // getScreenCTM() идеален, так как учитывает текущий CSS-размер и ViewBox
                 const svgP = pt.matrixTransform(svgOverlay.getScreenCTM().inverse());
                 return { x: svgP.x, y: svgP.y };
             }
 
-            // Маркеры размера (только для rect/кругов)
             function createResizeHandles(el, g) {
-                if(el.type !== 'rect') return;
+                if(el.type !== 'rect' && el.type !== 'line' && el.type !== 'image') return;
                 const positions = [
                     { dir: 'nw', cx: el.x, cy: el.y },
                     { dir: 'n', cx: el.x + el.w/2, cy: el.y },
@@ -463,7 +606,6 @@
                 });
             }
 
-            // Главная отрисовка
             function updateSVG() {
                 svgOverlay.innerHTML = '';
                 
@@ -472,16 +614,19 @@
                 bgRect.setAttribute('width', 1080);
                 bgRect.setAttribute('height', 1920);
                 bgRect.setAttribute('fill', 'transparent');
-                bgRect.addEventListener('mousedown', () => {
-                    selectedFrameId = null;
-                    updatePropsUI();
+                bgRect.addEventListener('mousedown', (e) => {
+                    if (!e.shiftKey) {
+                        selectedElementIds.clear();
+                        updatePropsUI();
+                    }
+                    isSelecting = true;
+                    selectionStart = getMouseCoords(e);
+                    selectionBoxState = { active: true, x: selectionStart.x, y: selectionStart.y, w: 0, h: 0 };
                     updateSVG();
                 });
                 svgOverlay.appendChild(bgRect);
 
                 const defs = document.createElementNS(svgNS, 'defs');
-                
-                // Вшиваем шрифты (все 20) и стили REC для корректного экспорта на Canvas
                 const styleDef = document.createElementNS(svgNS, 'style');
                 styleDef.textContent = `
                     @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Comfortaa:wght@400;700&family=Inter:wght@400;700&family=Jura:wght@400;700&family=Kelly+Slab&family=Lobster&family=Marck+Script&family=Montserrat:wght@400;700&family=Neucha&family=Open+Sans:wght@400;700&family=Oswald:wght@400;700&family=PT+Sans:wght@400;700&family=Philosopher:wght@400;700&family=Press+Start+2P&family=Raleway:wght@400;700&family=Roboto:wght@400;700&family=Rubik+Mono+One&family=Russo+One&family=Ubuntu:wght@400;700&family=Yanone+Kaffeesatz:wght@400;700&display=swap');
@@ -490,25 +635,47 @@
                 `;
                 defs.appendChild(styleDef);
 
-                // Создаем индивидуальные фильтры свечения для каждого элемента
                 elements.forEach(el => {
-                    if (el.glow > 0) {
+                    if ((el.glow && el.glow > 0) || (el.shadow && el.shadow > 0)) {
                         const filter = document.createElementNS(svgNS, 'filter');
-                        filter.setAttribute('id', `glow-${el.id}`);
+                        filter.setAttribute('id', `fx-${el.id}`);
                         filter.setAttribute('x', '-50%'); filter.setAttribute('y', '-50%');
                         filter.setAttribute('width', '200%'); filter.setAttribute('height', '200%');
                         
-                        const feG = document.createElementNS(svgNS, 'feGaussianBlur');
-                        feG.setAttribute('in', 'SourceGraphic');
-                        feG.setAttribute('stdDeviation', el.glow);
-                        feG.setAttribute('result', 'blur');
+                        const feMerge = document.createElementNS(svgNS, 'feMerge');
                         
-                        const feM = document.createElementNS(svgNS, 'feMerge');
-                        const fM1 = document.createElementNS(svgNS, 'feMergeNode'); fM1.setAttribute('in', 'blur');
-                        const fM2 = document.createElementNS(svgNS, 'feMergeNode'); fM2.setAttribute('in', 'SourceGraphic');
+                        if (el.shadow > 0) {
+                            const feDrop = document.createElementNS(svgNS, 'feDropShadow');
+                            feDrop.setAttribute('dx', '0');
+                            feDrop.setAttribute('dy', (el.shadow / 2).toString());
+                            feDrop.setAttribute('stdDeviation', el.shadow.toString());
+                            feDrop.setAttribute('flood-color', '#000000');
+                            feDrop.setAttribute('flood-opacity', '0.8');
+                            feDrop.setAttribute('result', 'shadowLayer');
+                            filter.appendChild(feDrop);
+                            
+                            const mnShadow = document.createElementNS(svgNS, 'feMergeNode');
+                            mnShadow.setAttribute('in', 'shadowLayer');
+                            feMerge.appendChild(mnShadow);
+                        }
                         
-                        feM.appendChild(fM1); feM.appendChild(fM2);
-                        filter.appendChild(feG); filter.appendChild(feM);
+                        if (el.glow > 0) {
+                            const feGlow = document.createElementNS(svgNS, 'feGaussianBlur');
+                            feGlow.setAttribute('in', 'SourceGraphic');
+                            feGlow.setAttribute('stdDeviation', el.glow.toString());
+                            feGlow.setAttribute('result', 'glowLayer');
+                            filter.appendChild(feGlow);
+                            
+                            const mnGlow = document.createElementNS(svgNS, 'feMergeNode');
+                            mnGlow.setAttribute('in', 'glowLayer');
+                            feMerge.appendChild(mnGlow);
+                        }
+                        
+                        const mnSrc = document.createElementNS(svgNS, 'feMergeNode');
+                        mnSrc.setAttribute('in', 'SourceGraphic');
+                        feMerge.appendChild(mnSrc);
+                        
+                        filter.appendChild(feMerge);
                         defs.appendChild(filter);
                     }
                 });
@@ -520,83 +687,82 @@
                 handlesGroup.setAttribute('id', 'handles-group');
                 
                 elements.forEach(el => {
-                    if (el.type === 'rect') {
+                    if (selectedElementIds.has(el.id)) {
+                        const hRect = document.createElementNS(svgNS, 'rect');
+                        let pad = 12;
+                        let hx, hy, hw, hh;
+                        if (el.type === 'text') {
+                            hw = el.text.length * (el.fontSize * 0.6); hh = el.fontSize * 1.2;
+                            hx = el.x - hw / 2 - pad; hy = el.y - pad; hw += pad * 2; hh += pad * 2;
+                        } else {
+                            hx = el.x - pad; hy = el.y - pad; hw = el.w + pad * 2; hh = el.h + pad * 2;
+                        }
+                        hRect.setAttribute('x', hx); hRect.setAttribute('y', hy); hRect.setAttribute('width', hw); hRect.setAttribute('height', hh);
+                        hRect.setAttribute('fill', 'rgba(0, 240, 255, 0.08)'); hRect.setAttribute('stroke', '#00f0ff');
+                        hRect.setAttribute('stroke-dasharray', '6,6'); hRect.setAttribute('stroke-width', '2'); hRect.setAttribute('rx', '8');
+                        hRect.setAttribute('class', 'pointer-events-none highlight-box');
+                        framesGroup.appendChild(hRect);
+                    }
+
+                    const applyFilters = (node) => {
+                        if ((el.glow > 0) || (el.shadow > 0)) node.setAttribute('filter', `url(#fx-${el.id})`);
+                    };
+
+                    if (el.type === 'rect' || el.type === 'line') {
                         const rect = document.createElementNS(svgNS, 'rect');
-                        rect.setAttribute('x', el.x);
-                        rect.setAttribute('y', el.y);
-                        rect.setAttribute('width', el.w);
-                        rect.setAttribute('height', el.h);
-                        // Заливка всегда отключена, чтобы квадрат не мешал
-                        rect.setAttribute('fill', 'none');
-                        rect.setAttribute('stroke', el.color);
-                        rect.setAttribute('stroke-width', globalStrokeWidth * 2);
+                        rect.setAttribute('x', el.x); rect.setAttribute('y', el.y);
+                        rect.setAttribute('width', el.w); rect.setAttribute('height', el.h);
                         rect.setAttribute('rx', el.rx || 0);
                         
-                        if (el.glow > 0) rect.setAttribute('filter', `url(#glow-${el.id})`);
+                        if (el.type === 'rect') {
+                            rect.setAttribute('fill', 'none');
+                            rect.setAttribute('stroke', el.color);
+                            rect.setAttribute('stroke-width', globalStrokeWidth * 2);
+                        } else {
+                            rect.setAttribute('fill', el.color); rect.setAttribute('stroke', 'none');
+                        }
                         
-                        // Если элемент выбран, добавляем класс для лучшего захвата курсором даже если внутри прозрачно
-                        // Для этого рисуем скрытый прямоугольник-перехватчик событий, чтобы можно было тянуть за центр прозрачной области
-                        if (el.id === selectedFrameId) {
+                        applyFilters(rect);
+                        
+                        if (selectedElementIds.has(el.id)) {
                             const grabRect = document.createElementNS(svgNS, 'rect');
                             grabRect.setAttribute('x', el.x); grabRect.setAttribute('y', el.y);
                             grabRect.setAttribute('width', el.w); grabRect.setAttribute('height', el.h);
-                            grabRect.setAttribute('fill', 'transparent'); 
-                            grabRect.setAttribute('class', 'cursor-move');
+                            grabRect.setAttribute('fill', 'transparent'); grabRect.setAttribute('class', 'cursor-move grab-rect');
                             grabRect.addEventListener('mousedown', (e) => { e.stopPropagation(); startDrag(e, el); });
                             framesGroup.appendChild(grabRect);
                             
-                            createResizeHandles(el, handlesGroup);
+                            if(selectedElementIds.size === 1) createResizeHandles(el, handlesGroup);
                         }
 
                         rect.setAttribute('class', 'hud-border cursor-move');
                         rect.dataset.id = el.id;
                         rect.addEventListener('mousedown', (e) => { e.stopPropagation(); startDrag(e, el); });
-                        
                         framesGroup.appendChild(rect);
 
-                        // Индикатор REC (Настраиваемый угол и размер)
-                        if (el.rec) {
+                        if (el.type === 'rect' && el.rec) {
                             const recPos = el.recPos || 'tl';
                             const recSize = parseFloat(el.recSize) || 1;
-                            
-                            const rBaseRadius = 6;
-                            const rBaseFontSize = 13;
-                            
-                            const dotR = rBaseRadius * recSize;
-                            const textSz = rBaseFontSize * recSize;
-                            const pad = 18 * recSize; 
-                            
-                            // Приблизительная ширина текста REC (3 символа)
-                            const textWidth = textSz * 0.65 * 3;
-                            // общая ширина = (диаметр круга) + (отступ) + (ширина текста)
-                            const totalWidth = (dotR * 2) + (4 * recSize) + textWidth; 
-                            const totalHeight = Math.max(dotR * 2, textSz);
+                            const rBaseRadius = 6, rBaseFontSize = 13;
+                            const dotR = rBaseRadius * recSize, textSz = rBaseFontSize * recSize, pad = 18 * recSize; 
+                            const textWidth = textSz * 0.65 * 3, totalWidth = (dotR * 2) + (4 * recSize) + textWidth, totalHeight = Math.max(dotR * 2, textSz);
 
                             let gX = 0, gY = 0;
-                            
-                            if (recPos === 'tl') {
-                                gX = el.x + pad; gY = el.y + pad;
-                            } else if (recPos === 'tr') {
-                                gX = el.x + el.w - pad - totalWidth; gY = el.y + pad;
-                            } else if (recPos === 'bl') {
-                                gX = el.x + pad; gY = el.y + el.h - pad - totalHeight;
-                            } else if (recPos === 'br') {
-                                gX = el.x + el.w - pad - totalWidth; gY = el.y + el.h - pad - totalHeight;
-                            }
+                            if (recPos === 'tl') { gX = el.x + pad; gY = el.y + pad; } 
+                            else if (recPos === 'tr') { gX = el.x + el.w - pad - totalWidth; gY = el.y + pad; } 
+                            else if (recPos === 'bl') { gX = el.x + pad; gY = el.y + el.h - pad - totalHeight; } 
+                            else if (recPos === 'br') { gX = el.x + el.w - pad - totalWidth; gY = el.y + el.h - pad - totalHeight; }
                             
                             const recGroup = document.createElementNS(svgNS, 'g');
                             recGroup.setAttribute('transform', `translate(${gX}, ${gY})`);
                             
                             const recDot = document.createElementNS(svgNS, 'circle');
-                            recDot.setAttribute('cx', dotR.toString()); 
-                            recDot.setAttribute('cy', dotR.toString()); 
-                            recDot.setAttribute('r', dotR.toString());
-                            recDot.setAttribute('fill', '#ef4444');
+                            recDot.setAttribute('cx', dotR.toString()); recDot.setAttribute('cy', dotR.toString()); 
+                            recDot.setAttribute('r', dotR.toString()); recDot.setAttribute('fill', '#ef4444');
                             recDot.setAttribute('class', 'animate-pulse-fast');
                             
                             const recText = document.createElementNS(svgNS, 'text');
                             recText.setAttribute('x', (dotR * 2 + (4 * recSize)).toString());
-                            // Выравнивание текста по высоте круга
                             recText.setAttribute('y', (dotR + textSz/2.8).toString()); 
                             recText.setAttribute('fill', '#ef4444');
                             recText.setAttribute('font-family', 'Inter, sans-serif');
@@ -609,10 +775,34 @@
                             framesGroup.appendChild(recGroup);
                         }
                     
+                    } else if (el.type === 'image') {
+                        const img = document.createElementNS(svgNS, 'image');
+                        img.setAttribute('x', el.x); img.setAttribute('y', el.y);
+                        img.setAttribute('width', el.w); img.setAttribute('height', el.h);
+                        img.setAttribute('href', el.src);
+                        img.setAttribute('preserveAspectRatio', 'none');
+                        
+                        applyFilters(img);
+
+                        if (selectedElementIds.has(el.id)) {
+                            const grabRect = document.createElementNS(svgNS, 'rect');
+                            grabRect.setAttribute('x', el.x); grabRect.setAttribute('y', el.y);
+                            grabRect.setAttribute('width', el.w); grabRect.setAttribute('height', el.h);
+                            grabRect.setAttribute('fill', 'transparent'); grabRect.setAttribute('class', 'cursor-move grab-rect');
+                            grabRect.addEventListener('mousedown', (e) => { e.stopPropagation(); startDrag(e, el); });
+                            framesGroup.appendChild(grabRect);
+                            
+                            if(selectedElementIds.size === 1) createResizeHandles(el, handlesGroup);
+                        }
+
+                        img.setAttribute('class', 'cursor-move');
+                        img.dataset.id = el.id;
+                        img.addEventListener('mousedown', (e) => { e.stopPropagation(); startDrag(e, el); });
+                        framesGroup.appendChild(img);
+
                     } else if (el.type === 'text') {
                         const txt = document.createElementNS(svgNS, 'text');
-                        txt.setAttribute('x', el.x);
-                        txt.setAttribute('y', el.y);
+                        txt.setAttribute('x', el.x); txt.setAttribute('y', el.y);
                         txt.setAttribute('fill', el.color);
                         txt.setAttribute('font-family', el.fontFamily + ', sans-serif');
                         txt.setAttribute('font-size', el.fontSize);
@@ -620,13 +810,11 @@
                         txt.setAttribute('text-anchor', 'middle'); 
                         txt.setAttribute('dominant-baseline', 'hanging');
                         
-                        if (el.glow > 0) txt.setAttribute('filter', `url(#glow-${el.id})`);
+                        applyFilters(txt);
                         
                         txt.textContent = el.text;
                         txt.setAttribute('class', 'hud-text cursor-move');
                         txt.dataset.id = el.id;
-                        
-                        // Выделение текста тоже убрано, ориентируемся на панель свойств
                         
                         txt.addEventListener('mousedown', (e) => { e.stopPropagation(); startDrag(e, el); });
                         framesGroup.appendChild(txt);
@@ -640,55 +828,107 @@
                 guideG.setAttribute('id', 'guides');
                 svgOverlay.appendChild(guideG);
 
+                if (selectionBoxState.active) {
+                    const selBox = document.createElementNS(svgNS, 'rect');
+                    selBox.setAttribute('id', 'selection-marquee');
+                    selBox.setAttribute('x', selectionBoxState.x);
+                    selBox.setAttribute('y', selectionBoxState.y);
+                    selBox.setAttribute('width', selectionBoxState.w);
+                    selBox.setAttribute('height', selectionBoxState.h);
+                    selBox.setAttribute('fill', 'rgba(0, 240, 255, 0.15)');
+                    selBox.setAttribute('stroke', '#00f0ff');
+                    selBox.setAttribute('stroke-dasharray', '5,5');
+                    selBox.setAttribute('stroke-width', '2');
+                    svgOverlay.appendChild(selBox);
+                }
+
+                saveData();
                 scheduleRenderPNG();
             }
 
             function updatePropsUI() {
                 const propsDiv = document.getElementById('frame-props');
-                if (!selectedFrameId) {
-                    propsDiv.classList.add('opacity-50', 'pointer-events-none');
+                const emptyDiv = document.getElementById('empty-state-info');
+
+                if (selectedElementIds.size === 0) {
+                    propsDiv.classList.add('hidden', 'opacity-0', 'pointer-events-none');
+                    emptyDiv.classList.remove('hidden', 'opacity-0');
                     return;
                 }
-                propsDiv.classList.remove('opacity-50', 'pointer-events-none');
                 
-                const el = elements.find(fr => fr.id === selectedFrameId);
+                emptyDiv.classList.add('hidden', 'opacity-0');
+                propsDiv.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
                 
-                // Обновление общих свойств (Цвет, Свечение)
-                document.getElementById('frame-color').value = el.color;
-                document.getElementById('glow-slider').value = el.glow !== undefined ? el.glow : 12;
-                document.getElementById('glow-val').innerText = el.glow !== undefined ? el.glow : 12;
+                const firstId = Array.from(selectedElementIds)[0];
+                const el = elements.find(fr => fr.id === firstId);
+                if (!el) return;
+                
+                document.getElementById('frame-color').value = el.color || '#ffffff';
+                document.getElementById('glow-slider').value = el.glow !== undefined ? el.glow : 0;
+                document.getElementById('glow-val').innerText = el.glow !== undefined ? el.glow : 0;
+                document.getElementById('shadow-slider').value = el.shadow !== undefined ? el.shadow : 0;
+                document.getElementById('shadow-val').innerText = el.shadow !== undefined ? el.shadow : 0;
 
                 const pRect = document.getElementById('prop-rect');
                 const pText = document.getElementById('prop-text');
+                const recWrapper = document.getElementById('rec-wrapper');
+                const rxContainer = document.getElementById('rx-container');
+                const colorGlowSection = document.getElementById('color-glow-section');
 
-                if (el.type === 'rect') {
-                    pRect.classList.remove('hidden'); pText.classList.add('hidden');
+                if (el.type === 'image') {
+                    colorGlowSection.classList.add('hidden');
+                    pRect.classList.remove('hidden'); 
+                    pText.classList.add('hidden');
+                    recWrapper.classList.add('hidden');
+                    rxContainer.classList.add('hidden');
+                    
                     if (document.activeElement !== document.getElementById('frame-w')) document.getElementById('frame-w').value = Math.round(el.w);
                     if (document.activeElement !== document.getElementById('frame-h')) document.getElementById('frame-h').value = Math.round(el.h);
-                    document.getElementById('frame-rx').value = el.rx || 0;
+                } else {
+                    colorGlowSection.classList.remove('hidden');
                     
-                    // Обновление REC
-                    document.getElementById('frame-rec').checked = el.rec || false;
-                    document.getElementById('frame-rec-pos').value = el.recPos || 'tl';
-                    document.getElementById('frame-rec-size').value = el.recSize || 1;
-                    
-                    if (el.rec) {
-                        document.getElementById('rec-settings').classList.remove('opacity-50', 'pointer-events-none');
-                    } else {
-                        document.getElementById('rec-settings').classList.add('opacity-50', 'pointer-events-none');
-                    }
-
-                } else if (el.type === 'text') {
-                    pRect.classList.add('hidden'); pText.classList.remove('hidden');
-                    if (document.activeElement !== document.getElementById('frame-text-val')) document.getElementById('frame-text-val').value = el.text;
-                    document.getElementById('frame-font-family').value = el.fontFamily;
-                    
-                    // Синхронизация слайдера и поля ввода размера текста
-                    if (document.activeElement !== document.getElementById('frame-font-size') && document.activeElement !== document.getElementById('frame-font-size-slider')) {
-                        document.getElementById('frame-font-size').value = el.fontSize;
-                        document.getElementById('frame-font-size-slider').value = el.fontSize;
+                    if (el.type === 'rect' || el.type === 'line') {
+                        pRect.classList.remove('hidden'); pText.classList.add('hidden');
+                        if (document.activeElement !== document.getElementById('frame-w')) document.getElementById('frame-w').value = Math.round(el.w);
+                        if (document.activeElement !== document.getElementById('frame-h')) document.getElementById('frame-h').value = Math.round(el.h);
+                        
+                        if (el.isCircle) {
+                            rxContainer.classList.add('hidden');
+                        } else {
+                            rxContainer.classList.remove('hidden');
+                            document.getElementById('frame-rx').value = el.rx || 0;
+                        }
+                        
+                        if (el.type === 'line') {
+                            recWrapper.classList.add('hidden');
+                        } else {
+                            recWrapper.classList.remove('hidden');
+                            document.getElementById('frame-rec').checked = el.rec || false;
+                            document.getElementById('frame-rec-pos').value = el.recPos || 'tl';
+                            document.getElementById('frame-rec-size').value = el.recSize || 1;
+                            
+                            if (el.rec) document.getElementById('rec-settings').classList.remove('opacity-50', 'pointer-events-none');
+                            else document.getElementById('rec-settings').classList.add('opacity-50', 'pointer-events-none');
+                        }
+                    } else if (el.type === 'text') {
+                        pRect.classList.add('hidden'); pText.classList.remove('hidden');
+                        if (document.activeElement !== document.getElementById('frame-text-val')) document.getElementById('frame-text-val').value = el.text;
+                        document.getElementById('frame-font-family').value = el.fontFamily;
+                        
+                        if (document.activeElement !== document.getElementById('frame-font-size') && document.activeElement !== document.getElementById('frame-font-size-slider')) {
+                            document.getElementById('frame-font-size').value = el.fontSize;
+                            document.getElementById('frame-font-size-slider').value = el.fontSize;
+                        }
                     }
                 }
+            }
+
+            function updateSelected(updaterFn) {
+                selectedElementIds.forEach(id => {
+                    let el = elements.find(e => e.id === id);
+                    if (el) updaterFn(el);
+                });
+                updateSVG();
             }
 
             function drawGuides(lines) {
@@ -705,34 +945,57 @@
                 });
             }
 
-            // Перетаскивание
             function startDrag(evt, el) {
                 if (resizeHandle) return; 
-                dragFrame = el;
-                selectedFrameId = el.id;
-                updatePropsUI();
-                updateSVG(); 
+                
+                if (evt.shiftKey) {
+                    if (selectedElementIds.has(el.id)) selectedElementIds.delete(el.id);
+                    else selectedElementIds.add(el.id);
+                } else {
+                    if (!selectedElementIds.has(el.id)) {
+                        selectedElementIds.clear();
+                        selectedElementIds.add(el.id);
+                    }
+                }
+                
+                if (selectedElementIds.size === 0) { updatePropsUI(); updateSVG(); return; }
+
+                dragAnchorId = el.id;
                 const coords = getMouseCoords(evt);
-                offsetX = coords.x - el.x;
-                offsetY = coords.y - el.y;
+                dragStartCoords = coords;
+                
+                dragOffsets.clear();
+                elements.forEach(e => {
+                    if (selectedElementIds.has(e.id)) { dragOffsets.set(e.id, { startX: e.x, startY: e.y }); }
+                });
+
+                updatePropsUI(); updateSVG(); 
             }
 
-            // Ресайз рамок
             function startResize(evt, el, dir) {
                 dragFrame = el; 
                 resizeHandle = dir;
-                selectedFrameId = el.id;
+                selectedElementIds.clear(); selectedElementIds.add(el.id);
+                
                 const coords = getMouseCoords(evt);
                 offsetX = coords.x; offsetY = coords.y;
                 dragFrame._startX = dragFrame.x; dragFrame._startY = dragFrame.y;
                 dragFrame._startW = dragFrame.w; dragFrame._startH = dragFrame.h;
+                dragFrame._ratio = dragFrame.w / dragFrame.h;
+                
+                updatePropsUI(); updateSVG();
             }
 
             window.addEventListener('mousemove', (evt) => {
-                if (!dragFrame) return;
                 const coords = getMouseCoords(evt);
+                
+                if (isSelecting) {
+                    selectionBoxState.x = Math.min(coords.x, selectionStart.x); selectionBoxState.y = Math.min(coords.y, selectionStart.y);
+                    selectionBoxState.w = Math.abs(coords.x - selectionStart.x); selectionBoxState.h = Math.abs(coords.y - selectionStart.y);
+                    updateSVG(); return;
+                }
 
-                if (resizeHandle && dragFrame.type === 'rect') {
+                if (dragFrame && resizeHandle) {
                     const dx = coords.x - offsetX; const dy = coords.y - offsetY;
                     let newX = dragFrame._startX, newY = dragFrame._startY;
                     let newW = dragFrame._startW, newH = dragFrame._startH;
@@ -742,32 +1005,63 @@
                     if (resizeHandle.includes('s')) newH += dy;
                     if (resizeHandle.includes('n')) { newH -= dy; newY += dy; }
 
-                    if (newW < 20) { newW = 20; if (resizeHandle.includes('w')) newX = dragFrame._startX + dragFrame._startW - 20; }
-                    if (newH < 20) { newH = 20; if (resizeHandle.includes('n')) newY = dragFrame._startY + dragFrame._startH - 20; }
+                    if (dragFrame.isCircle || evt.shiftKey) {
+                        let ratio = dragFrame.isCircle ? 1 : dragFrame._ratio;
+                        if (resizeHandle === 'se' || resizeHandle === 'sw' || resizeHandle === 'ne' || resizeHandle === 'nw') {
+                            if (Math.abs(newW - dragFrame._startW) > Math.abs(newH - dragFrame._startH)) {
+                                newH = newW / ratio; if (resizeHandle.includes('n')) newY = dragFrame._startY + dragFrame._startH - newH;
+                            } else {
+                                newW = newH * ratio; if (resizeHandle.includes('w')) newX = dragFrame._startX + dragFrame._startW - newW;
+                            }
+                        } else if (resizeHandle === 'e' || resizeHandle === 'w') {
+                            newH = newW / ratio; newY = dragFrame._startY - (newH - dragFrame._startH)/2;
+                        } else if (resizeHandle === 'n' || resizeHandle === 's') {
+                            newW = newH * ratio; newX = dragFrame._startX - (newW - dragFrame._startW)/2;
+                        }
+                    }
+
+                    if (newW < 4) { newW = 4; if (resizeHandle.includes('w')) newX = dragFrame._startX + dragFrame._startW - 4; }
+                    if (newH < 4) { newH = 4; if (resizeHandle.includes('n')) newY = dragFrame._startY + dragFrame._startH - 4; }
 
                     dragFrame.x = newX; dragFrame.y = newY; dragFrame.w = newW; dragFrame.h = newH;
-                    updateSVG();
-                    updatePropsUI();
                     
-                } else {
-                    let newX = coords.x - offsetX;
-                    let newY = coords.y - offsetY;
+                    if (dragFrame.isCircle) dragFrame.rx = newW / 2;
+                    
+                    updateSVG(); updatePropsUI(); return;
+                }
+
+                if (dragAnchorId) {
+                    const anchor = elements.find(e => e.id === dragAnchorId);
+                    const anchorStart = dragOffsets.get(dragAnchorId);
+
+                    let rawAnchorX = anchorStart.startX + (coords.x - dragStartCoords.x);
+                    let rawAnchorY = anchorStart.startY + (coords.y - dragStartCoords.y);
+
+                    let newX = rawAnchorX, newY = rawAnchorY;
                     const threshold = 15;
                     
-                    let pX = dragFrame.type === 'text' ? [newX] : [newX, newX + dragFrame.w / 2, newX + dragFrame.w];
-                    let pY = dragFrame.type === 'text' ? [newY] : [newY, newY + dragFrame.h / 2, newY + dragFrame.h];
+                    let pX = (anchor.type === 'text') ? [newX] : [newX, newX + anchor.w / 2, newX + anchor.w];
+                    let pY = (anchor.type === 'text') ? [newY, newY + anchor.fontSize / 2, newY + anchor.fontSize] : [newY, newY + anchor.h / 2, newY + anchor.h];
                     
                     const targetX = [0, 540, 1080];
                     const targetY = [0, 960, 1920];
                     
-                    let snappedX = false, snappedY = false;
-                    let guides = [];
+                    elements.forEach(el => {
+                        if (!selectedElementIds.has(el.id)) {
+                            if (el.type === 'rect' || el.type === 'line' || el.type === 'image') {
+                                targetX.push(el.x + el.w / 2); targetY.push(el.y + el.h / 2);
+                            } else if (el.type === 'text') {
+                                targetX.push(el.x); targetY.push(el.y + el.fontSize / 2);
+                            }
+                        }
+                    });
+                    
+                    let snappedX = false, snappedY = false, guides = [];
 
                     for (let px of pX) {
                         for (let tx of targetX) {
                             if (Math.abs(px - tx) < threshold) {
-                                newX += (tx - px);
-                                guides.push({x1: tx, y1: 0, x2: tx, y2: 1920});
+                                newX += (tx - px); guides.push({x1: tx, y1: 0, x2: tx, y2: 1920});
                                 snappedX = true; break;
                             }
                         }
@@ -776,177 +1070,305 @@
                     for (let py of pY) {
                         for (let ty of targetY) {
                             if (Math.abs(py - ty) < threshold) {
-                                newY += (ty - py);
-                                guides.push({x1: 0, y1: ty, x2: 1080, y2: ty});
+                                newY += (ty - py); guides.push({x1: 0, y1: ty, x2: 1080, y2: ty});
                                 snappedY = true; break;
                             }
                         }
                         if(snappedY) break;
                     }
 
-                    dragFrame.x = Math.round(newX);
-                    dragFrame.y = Math.round(newY);
+                    let dx = newX - anchorStart.startX, dy = newY - anchorStart.startY;
+
+                    elements.forEach(e => {
+                        if (selectedElementIds.has(e.id)) {
+                            const st = dragOffsets.get(e.id);
+                            e.x = Math.round(st.startX + dx); e.y = Math.round(st.startY + dy);
+                        }
+                    });
                     
-                    updateSVG();
-                    updatePropsUI();
-                    drawGuides(guides);
+                    updateSVG(); updatePropsUI(); drawGuides(guides);
                 }
             });
 
-            window.addEventListener('mouseup', () => {
-                if (dragFrame) {
-                    dragFrame = null; resizeHandle = null;
-                    drawGuides([]);
-                    scheduleRenderPNG();
+            window.addEventListener('mouseup', (evt) => {
+                if (dragFrame) { dragFrame = null; resizeHandle = null; drawGuides([]); scheduleRenderPNG(); }
+                if (dragAnchorId) { dragAnchorId = null; drawGuides([]); scheduleRenderPNG(); }
+                
+                if (isSelecting) {
+                    isSelecting = false; selectionBoxState.active = false;
+                    
+                    const coords = getMouseCoords(evt);
+                    const x1 = Math.min(coords.x, selectionStart.x), y1 = Math.min(coords.y, selectionStart.y);
+                    const x2 = Math.max(coords.x, selectionStart.x), y2 = Math.max(coords.y, selectionStart.y);
+
+                    if (x2 - x1 > 5 && y2 - y1 > 5) {
+                        elements.forEach(el => {
+                            let ex1 = el.x, ey1 = el.y;
+                            let ex2 = (el.type === 'text') ? el.x + (el.fontSize * 3) : el.x + el.w; 
+                            let ey2 = (el.type === 'text') ? el.y + el.fontSize : el.y + el.h;
+                            if (el.type === 'text') { ex1 = el.x - (el.fontSize * 2); ex2 = el.x + (el.fontSize * 2); }
+
+                            if (ex1 < x2 && ex2 > x1 && ey1 < y2 && ey2 > y1) selectedElementIds.add(el.id);
+                        });
+                    }
+                    updatePropsUI(); updateSVG();
                 }
             });
 
-            // Клавиатура
             window.addEventListener('keydown', (e) => {
-                if (!selectedFrameId || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+                if (selectedElementIds.size === 0 || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
                 const keys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
                 if (!keys.includes(e.key)) return;
                 e.preventDefault();
-                const el = elements.find(fr => fr.id === selectedFrameId);
+                
                 const step = e.shiftKey ? 10 : 1;
-                if (e.key === 'ArrowUp') el.y -= step;
-                if (e.key === 'ArrowDown') el.y += step;
-                if (e.key === 'ArrowLeft') el.x -= step;
-                if (e.key === 'ArrowRight') el.x += step;
-                updateSVG();
+                updateSelected(el => {
+                    if (e.key === 'ArrowUp') el.y -= step;
+                    if (e.key === 'ArrowDown') el.y += step;
+                    if (e.key === 'ArrowLeft') el.x -= step;
+                    if (e.key === 'ArrowRight') el.x += step;
+                });
             });
 
-            // Кнопки добавления (с дефолтным свечением)
             document.getElementById('add-rect-btn').addEventListener('click', () => {
                 const newId = 'el_' + Date.now();
-                elements.push({ id: newId, type: 'rect', x: 340, y: 810, w: 400, h: 300, color: '#ffffff', rx: 4, rec: false, recPos: 'tl', recSize: 1, glow: 12 });
-                selectedFrameId = newId; updatePropsUI(); updateSVG();
+                elements.push({ id: newId, type: 'rect', isCircle: false, x: 340, y: 810, w: 400, h: 300, color: '#ffffff', rx: 4, rec: false, recPos: 'tl', recSize: 1, glow: 12, shadow: 0 });
+                selectedElementIds.clear(); selectedElementIds.add(newId); updatePropsUI(); updateSVG();
             });
             document.getElementById('add-circ-btn').addEventListener('click', () => {
                 const newId = 'el_' + Date.now();
-                elements.push({ id: newId, type: 'rect', x: 390, y: 810, w: 300, h: 300, color: '#ffffff', rx: 150, rec: false, recPos: 'tl', recSize: 1, glow: 12 });
-                selectedFrameId = newId; updatePropsUI(); updateSVG();
+                elements.push({ id: newId, type: 'rect', isCircle: true, x: 390, y: 810, w: 300, h: 300, color: '#ffffff', rx: 150, rec: false, recPos: 'tl', recSize: 1, glow: 12, shadow: 0 });
+                selectedElementIds.clear(); selectedElementIds.add(newId); updatePropsUI(); updateSVG();
+            });
+            document.getElementById('add-line-btn').addEventListener('click', () => {
+                const newId = 'el_' + Date.now();
+                elements.push({ id: newId, type: 'line', x: 140, y: 960, w: 800, h: 10, color: '#ffffff', rx: 5, glow: 12, shadow: 0 });
+                selectedElementIds.clear(); selectedElementIds.add(newId); updatePropsUI(); updateSVG();
             });
             document.getElementById('add-txt-btn').addEventListener('click', () => {
                 const newId = 'el_' + Date.now();
-                elements.push({ id: newId, type: 'text', x: 540, y: 960, text: 'НОВЫЙ ТЕКСТ', color: '#ffffff', fontSize: 60, fontFamily: 'Inter', glow: 12 });
-                selectedFrameId = newId; updatePropsUI(); updateSVG();
+                elements.push({ id: newId, type: 'text', x: 540, y: 960, text: 'НОВЫЙ ТЕКСТ', color: '#ffffff', fontSize: 60, fontFamily: 'Inter', glow: 12, shadow: 0 });
+                selectedElementIds.clear(); selectedElementIds.add(newId); updatePropsUI(); updateSVG();
+            });
+            
+            document.getElementById('add-img-btn').addEventListener('click', () => {
+                document.getElementById('image-upload-input').click();
+            });
+
+            document.getElementById('image-upload-input').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const imgData = event.target.result;
+                    const tempImg = new Image();
+                    tempImg.onload = function() {
+                        let iw = tempImg.width, ih = tempImg.height;
+                        if (iw > 500) { ih = ih * (500/iw); iw = 500; }
+                        
+                        const newId = 'el_' + Date.now();
+                        elements.push({ id: newId, type: 'image', src: imgData, x: 540 - iw/2, y: 960 - ih/2, w: iw, h: ih, shadow: 0 });
+                        selectedElementIds.clear(); selectedElementIds.add(newId); 
+                        updatePropsUI(); updateSVG();
+                        
+                        document.getElementById('image-upload-input').value = '';
+                    };
+                    tempImg.src = imgData;
+                };
+                reader.readAsDataURL(file);
             });
             
             document.getElementById('remove-btn').addEventListener('click', () => {
-                if (!selectedFrameId) return;
-                elements = elements.filter(e => e.id !== selectedFrameId);
-                selectedFrameId = null; updatePropsUI(); updateSVG();
+                if (selectedElementIds.size === 0) return;
+                elements = elements.filter(e => !selectedElementIds.has(e.id));
+                selectedElementIds.clear(); updatePropsUI(); updateSVG();
             });
 
-            // Слои (Z-Index)
             document.getElementById('z-up').addEventListener('click', () => {
-                if (!selectedFrameId) return;
-                const idx = elements.findIndex(e => e.id === selectedFrameId);
-                if (idx < elements.length - 1) {
-                    const temp = elements[idx]; elements[idx] = elements[idx+1]; elements[idx+1] = temp;
-                    updateSVG();
-                }
+                let selectedArr = elements.filter(e => selectedElementIds.has(e.id));
+                selectedArr.reverse().forEach(sel => {
+                    let idx = elements.findIndex(e => e.id === sel.id);
+                    if (idx < elements.length - 1 && !selectedElementIds.has(elements[idx+1].id)) {
+                        let temp = elements[idx]; elements[idx] = elements[idx+1]; elements[idx+1] = temp;
+                    }
+                });
+                updateSVG();
             });
+            
             document.getElementById('z-down').addEventListener('click', () => {
-                if (!selectedFrameId) return;
-                const idx = elements.findIndex(e => e.id === selectedFrameId);
-                if (idx > 0) {
-                    const temp = elements[idx]; elements[idx] = elements[idx-1]; elements[idx-1] = temp;
-                    updateSVG();
-                }
+                let selectedArr = elements.filter(e => selectedElementIds.has(e.id));
+                selectedArr.forEach(sel => {
+                    let idx = elements.findIndex(e => e.id === sel.id);
+                    if (idx > 0 && !selectedElementIds.has(elements[idx-1].id)) {
+                        let temp = elements[idx]; elements[idx] = elements[idx-1]; elements[idx-1] = temp;
+                    }
+                });
+                updateSVG();
             });
 
-            // Выравнивание
             document.getElementById('align-center-x').addEventListener('click', () => {
-                if (!selectedFrameId) return;
-                const el = elements.find(e => e.id === selectedFrameId);
-                if(el.type === 'rect') el.x = 540 - el.w / 2;
-                if(el.type === 'text') el.x = 540;
-                updateSVG();
+                updateSelected(el => {
+                    if(el.type === 'rect' || el.type === 'line' || el.type === 'image') el.x = 540 - el.w / 2;
+                    if(el.type === 'text') el.x = 540;
+                });
             });
             document.getElementById('align-center-y').addEventListener('click', () => {
-                if (!selectedFrameId) return;
-                const el = elements.find(e => e.id === selectedFrameId);
-                if(el.type === 'rect') el.y = 960 - el.h / 2;
-                if(el.type === 'text') el.y = 960;
-                updateSVG();
+                updateSelected(el => {
+                    if(el.type === 'rect' || el.type === 'line' || el.type === 'image') el.y = 960 - el.h / 2;
+                    if(el.type === 'text') el.y = 960;
+                });
             });
 
-            // Глобальные слайдеры
             borderSlider.addEventListener('input', (e) => {
                 globalStrokeWidth = parseInt(e.target.value); borderVal.innerText = `${globalStrokeWidth} px`; updateSVG();
             });
 
-            // Свойства элементов: Цвет и индивидуальное Свечение
             document.getElementById('frame-color').addEventListener('input', (e) => {
-                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId); el.color = e.target.value; updateSVG();
+                updateSelected(el => el.color = e.target.value);
             });
             document.getElementById('glow-slider').addEventListener('input', (e) => {
-                if (!selectedFrameId) return; 
-                const el = elements.find(fr => fr.id === selectedFrameId); 
-                el.glow = parseInt(e.target.value);
-                document.getElementById('glow-val').innerText = el.glow;
-                updateSVG();
+                let val = parseInt(e.target.value); document.getElementById('glow-val').innerText = val;
+                updateSelected(el => el.glow = val);
+            });
+            document.getElementById('shadow-slider').addEventListener('input', (e) => {
+                let val = parseInt(e.target.value); document.getElementById('shadow-val').innerText = val;
+                updateSelected(el => el.shadow = val);
             });
             
-            // Рамки
             document.getElementById('frame-w').addEventListener('change', (e) => {
-                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
-                el.w = Math.max(20, parseInt(e.target.value) || 20); updateSVG();
+                let val = Math.max(4, parseInt(e.target.value) || 4);
+                updateSelected(el => { 
+                    if (el.type === 'rect' || el.type === 'line' || el.type === 'image') {
+                        el.w = val; if(el.isCircle) { el.h = val; el.rx = val/2; }
+                    } 
+                });
             });
             document.getElementById('frame-h').addEventListener('change', (e) => {
-                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
-                el.h = Math.max(20, parseInt(e.target.value) || 20); updateSVG();
+                let val = Math.max(4, parseInt(e.target.value) || 4);
+                updateSelected(el => { 
+                    if (el.type === 'rect' || el.type === 'line' || el.type === 'image') {
+                        el.h = val; if(el.isCircle) { el.w = val; el.rx = val/2; }
+                    } 
+                });
             });
             document.getElementById('frame-rx').addEventListener('input', (e) => {
-                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
-                el.rx = parseInt(e.target.value) || 0; updateSVG();
+                let val = parseInt(e.target.value) || 0;
+                updateSelected(el => { if ((el.type === 'rect' || el.type === 'line') && !el.isCircle) el.rx = val; });
             });
             
-            // Настройки REC
             document.getElementById('frame-rec').addEventListener('change', (e) => {
-                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
-                el.rec = e.target.checked; 
-                updatePropsUI();
-                updateSVG();
+                let val = e.target.checked; updateSelected(el => { if (el.type === 'rect') el.rec = val; }); updatePropsUI();
             });
             document.getElementById('frame-rec-pos').addEventListener('change', (e) => {
-                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
-                el.recPos = e.target.value; updateSVG();
+                let val = e.target.value; updateSelected(el => { if (el.type === 'rect') el.recPos = val; });
             });
             document.getElementById('frame-rec-size').addEventListener('input', (e) => {
-                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
-                el.recSize = parseFloat(e.target.value) || 1; updateSVG();
+                let val = parseFloat(e.target.value) || 1; updateSelected(el => { if (el.type === 'rect') el.recSize = val; });
             });
 
-            // Текст
             document.getElementById('frame-text-val').addEventListener('input', (e) => {
-                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
-                el.text = e.target.value || ' '; updateSVG();
+                let val = e.target.value || ' '; updateSelected(el => { if (el.type === 'text') el.text = val; });
             });
             document.getElementById('frame-font-family').addEventListener('change', (e) => {
-                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
-                el.fontFamily = e.target.value; updateSVG();
+                let val = e.target.value; updateSelected(el => { if (el.type === 'text') el.fontFamily = val; });
             });
             
-            // Взаимодействие между ползунком и полем ввода размера текста
             document.getElementById('frame-font-size').addEventListener('input', (e) => {
-                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
                 let val = Math.max(10, parseInt(e.target.value) || 40);
-                el.fontSize = val; 
-                document.getElementById('frame-font-size-slider').value = val;
-                updateSVG();
+                document.getElementById('frame-font-size-slider').value = val; updateSelected(el => { if (el.type === 'text') el.fontSize = val; });
             });
             document.getElementById('frame-font-size-slider').addEventListener('input', (e) => {
-                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
                 let val = parseInt(e.target.value);
-                el.fontSize = val; 
-                document.getElementById('frame-font-size').value = val;
-                updateSVG();
+                document.getElementById('frame-font-size').value = val; updateSelected(el => { if (el.type === 'text') el.fontSize = val; });
             });
 
-            // Рендер PNG 
+            function generateCleanSVG() {
+                let svgStr = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" style="width:100%; height:100%; display:block;">`;
+                svgStr += `<defs><style>
+                    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Comfortaa:wght@400;700&family=Inter:wght@400;700&family=Jura:wght@400;700&family=Kelly+Slab&family=Lobster&family=Marck+Script&family=Montserrat:wght@400;700&family=Neucha&family=Open+Sans:wght@400;700&family=Oswald:wght@400;700&family=PT+Sans:wght@400;700&family=Philosopher:wght@400;700&family=Press+Start+2P&family=Raleway:wght@400;700&family=Roboto:wght@400;700&family=Rubik+Mono+One&family=Russo+One&family=Ubuntu:wght@400;700&family=Yanone+Kaffeesatz:wght@400;700&display=swap');
+                    .animate-pulse-fast { animation: pulseREC 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+                    @keyframes pulseREC { 0%, 100% { opacity: 1; } 50% { opacity: .2; } }
+                </style>`;
+                
+                elements.forEach(el => {
+                    if ((el.glow > 0) || (el.shadow > 0)) {
+                        svgStr += `<filter id="fx-${el.id}" x="-50%" y="-50%" width="200%" height="200%">`;
+                        if (el.shadow > 0) {
+                            svgStr += `<feDropShadow dx="0" dy="${el.shadow / 2}" stdDeviation="${el.shadow}" flood-color="#000000" flood-opacity="0.8" result="shadowLayer"/>`;
+                        }
+                        if (el.glow > 0) {
+                            svgStr += `<feGaussianBlur in="SourceGraphic" stdDeviation="${el.glow}" result="glowLayer" />`;
+                        }
+                        svgStr += `<feMerge>`;
+                        if (el.shadow > 0) svgStr += `<feMergeNode in="shadowLayer" />`;
+                        if (el.glow > 0) svgStr += `<feMergeNode in="glowLayer" />`;
+                        svgStr += `<feMergeNode in="SourceGraphic" />`;
+                        svgStr += `</feMerge></filter>`;
+                    }
+                });
+                svgStr += `</defs>`;
+                
+                elements.forEach(el => {
+                    let filterAttr = ((el.glow > 0) || (el.shadow > 0)) ? `filter="url(#fx-${el.id})"` : '';
+                    
+                    if (el.type === 'rect' || el.type === 'line') {
+                        let fill = el.type === 'rect' ? 'none' : el.color;
+                        let stroke = el.type === 'rect' ? el.color : 'none';
+                        let sw = el.type === 'rect' ? globalStrokeWidth * 2 : 0;
+                        let rx = el.rx || 0;
+                        
+                        svgStr += `<rect x="${el.x}" y="${el.y}" width="${el.w}" height="${el.h}" rx="${rx}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" ${filterAttr} />`;
+                        
+                        if (el.type === 'rect' && el.rec) {
+                            const recSize = parseFloat(el.recSize) || 1;
+                            const dotR = 6 * recSize, textSz = 13 * recSize, pad = 18 * recSize; 
+                            const totalWidth = (dotR * 2) + (4 * recSize) + (textSz * 0.65 * 3); 
+                            const totalHeight = Math.max(dotR * 2, textSz);
+
+                            let gX = 0, gY = 0;
+                            if (el.recPos === 'tl') { gX = el.x + pad; gY = el.y + pad; } 
+                            else if (el.recPos === 'tr') { gX = el.x + el.w - pad - totalWidth; gY = el.y + pad; } 
+                            else if (el.recPos === 'bl') { gX = el.x + pad; gY = el.y + el.h - pad - totalHeight; } 
+                            else if (el.recPos === 'br') { gX = el.x + el.w - pad - totalWidth; gY = el.y + el.h - pad - totalHeight; }
+                            
+                            svgStr += `<g transform="translate(${gX}, ${gY})">
+                                <circle cx="${dotR}" cy="${dotR}" r="${dotR}" fill="#ef4444" class="animate-pulse-fast" />
+                                <text x="${dotR * 2 + (4 * recSize)}" y="${dotR + textSz/2.8}" fill="#ef4444" font-family="Inter, sans-serif" font-size="${textSz}px" font-weight="bold">REC</text>
+                            </g>`;
+                        }
+                    } else if (el.type === 'image') {
+                        svgStr += `<image x="${el.x}" y="${el.y}" width="${el.w}" height="${el.h}" href="${el.src}" preserveAspectRatio="none" ${filterAttr} />`;
+                    } else if (el.type === 'text') {
+                        svgStr += `<text x="${el.x}" y="${el.y}" fill="${el.color}" font-family="${el.fontFamily}, sans-serif" font-size="${el.fontSize}px" font-weight="bold" text-anchor="middle" dominant-baseline="hanging" ${filterAttr}>${el.text}</text>`;
+                    }
+                });
+                svgStr += `</svg>`;
+                return svgStr;
+            }
+
+            downloadHtmlBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const htmlContent = `<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Stream Overlay (Animated)</title>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background: transparent; }
+    </style>
+</head>
+<body>
+    ${generateCleanSVG()}
+</body>
+</html>`;
+                
+                const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url; a.download = 'animated_overlay.html';
+                document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+            });
+
             function scheduleRenderPNG() { clearTimeout(renderTimeout); renderTimeout = setTimeout(executeRenderPNG, 300); }
 
             function executeRenderPNG() {
@@ -954,18 +1376,19 @@
                     const bgRect = document.getElementById('bg-click-catcher'); if (bgRect) bgRect.style.display = 'none';
                     const guideG = document.getElementById('guides'); if (guideG) guideG.style.display = 'none';
                     const handlesG = document.getElementById('handles-group'); if (handlesG) handlesG.style.display = 'none';
-                    // Скрываем рамки-перехватчики (прозрачные заливки для удобства перетаскивания)
-                    const grabRects = svgOverlay.querySelectorAll('rect[fill="transparent"]');
-                    grabRects.forEach(r => r.style.display = 'none');
+                    const selMarquee = document.getElementById('selection-marquee'); if (selMarquee) selMarquee.style.display = 'none';
+                    
+                    const highlightBoxes = svgOverlay.querySelectorAll('.highlight-box'); highlightBoxes.forEach(r => r.style.display = 'none');
+                    const grabRects = svgOverlay.querySelectorAll('.grab-rect'); grabRects.forEach(r => r.style.display = 'none');
 
-                    // Конвертация
                     const svgSerializer = new XMLSerializer();
                     let svgString = svgSerializer.serializeToString(svgOverlay);
                     
-                    // Восстанавливаем DOM
                     if (bgRect) bgRect.style.display = 'block';
                     if (guideG) guideG.style.display = 'block';
                     if (handlesG) handlesG.style.display = 'block';
+                    if (selMarquee && selectionBoxState.active) selMarquee.style.display = 'block';
+                    highlightBoxes.forEach(r => r.style.display = 'block');
                     grabRects.forEach(r => r.style.display = 'block');
 
                     const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
@@ -974,25 +1397,17 @@
                     
                     const image = new Image();
                     image.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = 1080; canvas.height = 1920;
-                        const context = canvas.getContext('2d');
-                        context.clearRect(0, 0, 1080, 1920);
-                        context.drawImage(image, 0, 0, 1080, 1920);
-                        
-                        downloadBtn.href = canvas.toDataURL('image/png');
-                        downloadBtn.download = 'stream_vertical_overlay.png';
-                        downloadBtn.classList.remove('opacity-50', 'pointer-events-none');
-                        
+                        const canvas = document.createElement('canvas'); canvas.width = 1080; canvas.height = 1920;
+                        const context = canvas.getContext('2d'); context.clearRect(0, 0, 1080, 1920); context.drawImage(image, 0, 0, 1080, 1920);
+                        downloadPngBtn.href = canvas.toDataURL('image/png'); downloadPngBtn.download = 'stream_vertical_overlay.png';
                         URL.revokeObjectURL(blobURL);
                     };
                     image.src = blobURL;
-                } catch (e) {
-                    console.error('Ошибка рендера PNG:', e);
-                }
+                } catch (e) { console.error('Ошибка рендера PNG:', e); }
             }
 
-            // Первый запуск
+            // Инициализация авторизации
+            checkAuth();
             updatePropsUI();
             updateSVG();
         });
