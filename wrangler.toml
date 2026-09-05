@@ -5,4 +5,4 @@ compatibility_date = "2025-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "neuro-grafic-db"
-database_id = "ВСТАВЬТЕ-СЮДА-DATABASE-ID-ПОСЛЕ-СОЗДАНИЯ-БАЗЫ"
+database_id = "53377a57-b77e-4581-89af-4c340320670c"
