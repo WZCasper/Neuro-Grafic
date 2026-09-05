@@ -439,56 +439,242 @@
             let elements = [...defaultElements];
 
             // ----------------------------------------------------
-            // АВТОРИЗАЦИЯ ЧЕРЕЗ TELEGRAM И СОХРАНЕНИЯ
+            // АВТОРИЗАЦИЯ ЧЕРЕЗ TELEGRAM И ОБЛАЧНОЕ ХРАНЕНИЕ ПРОЕКТОВ
+            // Подпись Telegram проверяется на сервере (Cloudflare Worker),
+            // проекты хранятся в облачной базе данных, а не в localStorage.
             // ----------------------------------------------------
             let isLoggedIn = false;
-            let BOT_USERNAME = "YOUR_BOT_USERNAME"; // <-- Замените на юзернейм вашего бота из @BotFather без @
+            let currentProjectId = null;
+            const BOT_USERNAME = "Neuro_Grafic_Bot";
 
-            window.onTelegramAuth = function(user) {
-                localStorage.setItem('ng_telegram_user', JSON.stringify(user));
-                isLoggedIn = true;
-                renderUserProfile(user);
-                loadData();
-                saveData();
+            // После деплоя Worker'а (см. инструкцию) вставьте сюда его настоящий адрес.
+            const WORKER_URL = "https://ЗАМЕНИТЕ-НА-АДРЕС-ВАШЕГО-WORKER.workers.dev";
+
+            function getSessionToken() {
+                return localStorage.getItem('ng_session_token');
+            }
+
+            async function apiFetch(path, options = {}) {
+                const token = getSessionToken();
+                const res = await fetch(WORKER_URL + path, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
+                        ...(options.headers || {}),
+                    },
+                });
+
+                if (res.status === 401) {
+                    localStorage.removeItem('ng_session_token');
+                    isLoggedIn = false;
+                    currentProjectId = null;
+                    initTelegramWidget();
+                    throw new Error('Сессия истекла, войдите снова');
+                }
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.error || ('Ошибка сервера: HTTP ' + res.status));
+                }
+                return res.json();
+            }
+
+            window.onTelegramAuth = async function(user) {
+                try {
+                    const res = await fetch(WORKER_URL + '/api/auth/telegram', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(user),
+                    });
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        alert('Не удалось войти через Telegram: ' + (err.error || res.status));
+                        return;
+                    }
+                    const data = await res.json();
+                    localStorage.setItem('ng_session_token', data.token);
+                    isLoggedIn = true;
+                    renderUserProfile(data.user);
+                    await autoLoadLatestProject();
+                    updatePropsUI();
+                    updateSVG();
+                } catch (e) {
+                    alert('Не удалось подключиться к серверу авторизации: ' + e.message);
+                }
             };
 
             function renderUserProfile(user) {
                 const authContainer = document.getElementById('auth-container');
                 if (!authContainer) return;
-                
+
                 const displayName = user.first_name || user.username || 'Пользователь';
-                const avatar = user.photo_url 
-                    ? `<img src="${user.photo_url}" class="w-6 h-6 rounded-full border border-cyan-400 object-cover">` 
+                const avatar = user.photo_url
+                    ? `<img src="${user.photo_url}" class="w-6 h-6 rounded-full border border-cyan-400 object-cover">`
                     : `<span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold text-[10px] flex items-center justify-center border border-cyan-500/40">${displayName.charAt(0).toUpperCase()}</span>`;
-                
+
                 authContainer.innerHTML = `
-                    <div class="flex items-center gap-2 bg-zinc-800/90 px-3 py-1.5 rounded-lg border border-cyan-500/40 text-xs text-white shadow-md">
-                        ${avatar}
-                        <span class="font-bold text-cyan-300 max-w-[120px] truncate">${displayName}</span>
-                        <button id="logout-btn" class="ml-1 text-zinc-400 hover:text-red-400 font-bold transition-colors text-sm px-1" title="Выйти">✕</button>
+                    <div class="relative flex items-center gap-2">
+                        <div class="flex items-center gap-2 bg-zinc-800/90 px-3 py-1.5 rounded-lg border border-cyan-500/40 text-xs text-white shadow-md">
+                            ${avatar}
+                            <span class="font-bold text-cyan-300 max-w-[120px] truncate">${displayName}</span>
+                            <button id="logout-btn" class="ml-1 text-zinc-400 hover:text-red-400 font-bold transition-colors text-sm px-1" title="Выйти">✕</button>
+                        </div>
+                        <button id="projects-toggle-btn" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs font-bold text-white whitespace-nowrap">
+                            📁 Проекты
+                        </button>
+                        <div id="projects-panel" class="hidden absolute right-0 top-full mt-2 w-72 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl p-3 z-50">
+                            <div class="flex gap-2 mb-2">
+                                <button id="save-new-project-btn" class="flex-1 px-2 py-2 bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 rounded-lg text-[11px] font-bold text-white">＋ Сохранить как новый</button>
+                                <button id="update-project-btn" class="hidden flex-1 px-2 py-2 bg-zinc-700 hover:bg-zinc-600 rounded-lg text-[11px] font-bold text-white">💾 Обновить текущий</button>
+                            </div>
+                            <div id="projects-list" class="flex flex-col gap-1 text-xs max-h-60 overflow-y-auto custom-scrollbar"></div>
+                        </div>
                     </div>
                 `;
 
-                document.getElementById('logout-btn')?.addEventListener('click', () => {
-                    localStorage.removeItem('ng_telegram_user');
-                    localStorage.removeItem('ng_saved_elements');
+                document.getElementById('logout-btn')?.addEventListener('click', async () => {
+                    try { await apiFetch('/api/logout', { method: 'POST' }); } catch (e) { /* выходим локально в любом случае */ }
+                    localStorage.removeItem('ng_session_token');
                     isLoggedIn = false;
-                    checkAuth();
+                    currentProjectId = null;
+                    checkAuth().then(() => { updatePropsUI(); updateSVG(); });
                 });
+
+                document.getElementById('projects-toggle-btn')?.addEventListener('click', () => {
+                    const panel = document.getElementById('projects-panel');
+                    const willShow = panel.classList.contains('hidden');
+                    panel.classList.toggle('hidden');
+                    if (willShow) refreshProjectsList();
+                });
+
+                document.getElementById('save-new-project-btn')?.addEventListener('click', saveCurrentProjectAsNew);
+                document.getElementById('update-project-btn')?.addEventListener('click', updateCurrentProject);
+
+                document.getElementById('update-project-btn')?.classList.toggle('hidden', !currentProjectId);
             }
 
-            function checkAuth() {
-                const savedUser = localStorage.getItem('ng_telegram_user');
-                if (savedUser) {
-                    try {
-                        const user = JSON.parse(savedUser);
-                        isLoggedIn = true;
-                        renderUserProfile(user);
-                        loadData();
-                    } catch (e) {
-                        initTelegramWidget();
+            async function refreshProjectsList() {
+                const listEl = document.getElementById('projects-list');
+                if (!listEl) return;
+                listEl.innerHTML = '<div class="text-zinc-500 px-1 py-2">Загрузка...</div>';
+                try {
+                    const { projects } = await apiFetch('/api/projects');
+                    if (!projects.length) {
+                        listEl.innerHTML = '<div class="text-zinc-500 px-1 py-2">Пока нет сохранённых проектов</div>';
+                        return;
                     }
-                } else {
+                    listEl.innerHTML = '';
+                    projects.forEach((p) => {
+                        const row = document.createElement('div');
+                        row.className = 'flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg hover:bg-zinc-800';
+                        const isCurrent = String(p.id) === String(currentProjectId);
+                        row.innerHTML = `
+                            <span class="truncate ${isCurrent ? 'text-cyan-300 font-bold' : 'text-zinc-200'}">${p.name}</span>
+                            <span class="flex gap-1 flex-shrink-0">
+                                <button data-load="${p.id}" class="px-2 py-1 bg-zinc-700 hover:bg-cyan-600 rounded text-[10px] font-bold">Загрузить</button>
+                                <button data-delete="${p.id}" class="px-2 py-1 bg-zinc-700 hover:bg-red-600 rounded text-[10px] font-bold">✕</button>
+                            </span>
+                        `;
+                        listEl.appendChild(row);
+                    });
+                    listEl.querySelectorAll('[data-load]').forEach((btn) => {
+                        btn.addEventListener('click', () => loadProjectById(btn.getAttribute('data-load')));
+                    });
+                    listEl.querySelectorAll('[data-delete]').forEach((btn) => {
+                        btn.addEventListener('click', () => deleteProjectById(btn.getAttribute('data-delete')));
+                    });
+                } catch (e) {
+                    listEl.innerHTML = `<div class="text-red-400 px-1 py-2">${e.message}</div>`;
+                }
+            }
+
+            async function saveCurrentProjectAsNew() {
+                const name = prompt('Название проекта:', 'Мой оверлей');
+                if (!name) return;
+                try {
+                    const result = await apiFetch('/api/projects', {
+                        method: 'POST',
+                        body: JSON.stringify({ name, data: { elements, globalStrokeWidth } }),
+                    });
+                    currentProjectId = result.id;
+                    document.getElementById('update-project-btn')?.classList.remove('hidden');
+                    refreshProjectsList();
+                } catch (e) {
+                    alert('Не удалось сохранить проект: ' + e.message);
+                }
+            }
+
+            async function updateCurrentProject() {
+                if (!currentProjectId) return saveCurrentProjectAsNew();
+                try {
+                    await apiFetch(`/api/projects/${currentProjectId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ data: { elements, globalStrokeWidth } }),
+                    });
+                    refreshProjectsList();
+                } catch (e) {
+                    alert('Не удалось обновить проект: ' + e.message);
+                }
+            }
+
+            async function loadProjectById(id) {
+                try {
+                    const project = await apiFetch(`/api/projects/${id}`);
+                    elements = project.data.elements || [];
+                    if (project.data.globalStrokeWidth) {
+                        globalStrokeWidth = project.data.globalStrokeWidth;
+                        borderSlider.value = globalStrokeWidth;
+                        borderVal.innerText = `${globalStrokeWidth} px`;
+                    }
+                    currentProjectId = project.id;
+                    document.getElementById('update-project-btn')?.classList.remove('hidden');
+                    document.getElementById('projects-panel')?.classList.add('hidden');
+                    updatePropsUI();
+                    updateSVG();
+                    refreshProjectsList();
+                } catch (e) {
+                    alert('Не удалось загрузить проект: ' + e.message);
+                }
+            }
+
+            async function deleteProjectById(id) {
+                if (!confirm('Удалить этот проект без возможности восстановления?')) return;
+                try {
+                    await apiFetch(`/api/projects/${id}`, { method: 'DELETE' });
+                    if (String(id) === String(currentProjectId)) {
+                        currentProjectId = null;
+                        document.getElementById('update-project-btn')?.classList.add('hidden');
+                    }
+                    refreshProjectsList();
+                } catch (e) {
+                    alert('Не удалось удалить проект: ' + e.message);
+                }
+            }
+
+            async function autoLoadLatestProject() {
+                try {
+                    const { projects } = await apiFetch('/api/projects');
+                    if (projects && projects.length > 0) {
+                        await loadProjectById(projects[0].id);
+                    }
+                } catch (e) {
+                    // нет сохранённых проектов или сервер недоступен — остаёмся с оверлеем по умолчанию
+                }
+            }
+
+            async function checkAuth() {
+                const token = getSessionToken();
+                if (!token) {
+                    initTelegramWidget();
+                    return;
+                }
+                try {
+                    const { user } = await apiFetch('/api/me');
+                    isLoggedIn = true;
+                    renderUserProfile(user);
+                    await autoLoadLatestProject();
+                } catch (e) {
+                    isLoggedIn = false;
                     initTelegramWidget();
                 }
             }
@@ -497,16 +683,6 @@
                 const authContainer = document.getElementById('auth-container');
                 if (!authContainer) return;
                 authContainer.innerHTML = '';
-
-                if (BOT_USERNAME === "YOUR_BOT_USERNAME") {
-                    authContainer.innerHTML = `
-                        <button onclick="promptBotName()" class="px-3 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg transition-all text-xs tracking-wide flex items-center gap-2 border border-sky-400/50 shadow-lg">
-                            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.69-.52.36-1 .53-1.42.52-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.24.37-.49 1.02-.75 3.99-1.74 6.66-2.89 8.01-3.45 3.82-1.59 4.61-1.87 5.13-1.88.11 0 .37.03.54.17.14.12.18.28.2.45-.01.07.01.21 0 .33z"/></svg>
-                            Войти через Telegram
-                        </button>
-                    `;
-                    return;
-                }
 
                 const script = document.createElement('script');
                 script.src = "https://telegram.org/js/telegram-widget.js?22";
@@ -518,36 +694,6 @@
                 script.async = true;
 
                 authContainer.appendChild(script);
-            }
-
-            window.promptBotName = function() {
-                const name = prompt("Введите username вашего Telegram бота из @BotFather (без @):", "");
-                if (name) {
-                    BOT_USERNAME = name.trim();
-                    initTelegramWidget();
-                }
-            };
-
-            function saveData() {
-                if (isLoggedIn) {
-                    localStorage.setItem('ng_saved_elements', JSON.stringify(elements));
-                    localStorage.setItem('ng_global_stroke', globalStrokeWidth);
-                }
-            }
-
-            function loadData() {
-                const saved = localStorage.getItem('ng_saved_elements');
-                const savedStroke = localStorage.getItem('ng_global_stroke');
-                if (saved) {
-                    try {
-                        elements = JSON.parse(saved);
-                    } catch (e) { console.error('Error parsing save', e); }
-                }
-                if (savedStroke) {
-                    globalStrokeWidth = parseInt(savedStroke);
-                    borderSlider.value = globalStrokeWidth;
-                    borderVal.innerText = `${globalStrokeWidth} px`;
-                }
             }
 
             let selectedElementIds = new Set();
@@ -857,7 +1003,6 @@
                     svgOverlay.appendChild(selBox);
                 }
 
-                saveData();
                 scheduleRenderPNG();
             }
 
@@ -1431,7 +1576,13 @@
                     console.error("Ошибка при генерации PNG: ", e);
                 }
             }
-            
+
+            // Инициализация авторизации (checkAuth асинхронна: сначала проверяем сессию
+            // и, если она есть, подгружаем последний проект, и только потом рисуем оверлей)
+            checkAuth().then(() => {
+                updatePropsUI();
+                updateSVG();
+            });
         });
     </script>
 </body>
