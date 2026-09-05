@@ -166,9 +166,12 @@ export default {
           return json({ error: "Данные авторизации устарели, попробуйте войти ещё раз" }, 401);
         }
 
+        if (!env.TELEGRAM_BOT_TOKEN) {
+          return json({ error: "TELEGRAM_BOT_TOKEN не настроен на сервере — добавьте секрет в Settings → Variables and Secrets и нажмите Deploy" }, 500);
+        }
         const valid = await verifyTelegramAuth(data, env.TELEGRAM_BOT_TOKEN);
         if (!valid) {
-          return json({ error: "Не удалось подтвердить подпись Telegram" }, 401);
+          return json({ error: "Подпись Telegram не совпала — проверьте, что TELEGRAM_BOT_TOKEN скопирован точно (без пробелов и переносов строки) и это токен именно @Neuro_Grafic_Bot" }, 401);
         }
 
         const telegramId = String(data.id);
