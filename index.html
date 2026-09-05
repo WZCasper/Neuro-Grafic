@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neuro Grafic</title>
+    <title>Neuro Grafic - Оверлей Стримера</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Comfortaa:wght@400;700&family=Inter:wght@400;700&family=Jura:wght@400;700&family=Kelly+Slab&family=Lobster&family=Marck+Script&family=Montserrat:wght@400;700&family=Neucha&family=Open+Sans:wght@400;700&family=Oswald:wght@400;700&family=PT+Sans:wght@400;700&family=Philosopher:wght@400;700&family=Press+Start+2P&family=Raleway:wght@400;700&family=Roboto:wght@400;700&family=Rubik+Mono+One&family=Russo+One&family=Ubuntu:wght@400;700&family=Yanone+Kaffeesatz:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
         /* Шахматный фон для наглядной демонстрации прозрачности */
         .checkerboard-bg {
@@ -43,6 +46,29 @@
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
         
+        /* Стили для выпадающего списка шрифтов */
+        select option {
+            background-color: #18181b;
+            color: #ffffff;
+            padding: 4px;
+        }
+
+        /* Вертикальный ползунок масштабирования (Зум) */
+        .zoom-slider {
+            -webkit-appearance: slider-vertical;
+            appearance: slider-vertical;
+            width: 8px;
+            cursor: pointer;
+            background: #27272a;
+            border-radius: 10px;
+        }
+
+        /* Стили скроллбара для предпросмотра */
+        .custom-scrollbar::-webkit-scrollbar { width: 10px; height: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0a0a0c; border-radius: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #52525b; }
+        
         /* Стили для маркеров изменения размера (resize handles) */
         .resize-handle {
             fill: white;
@@ -56,15 +82,12 @@
         .resize-handle.e, .resize-handle.w { cursor: ew-resize; }
     </style>
 </head>
-<body class="bg-[#0f0f11] text-zinc-100 min-h-screen font-sans flex flex-col justify-between">
+<body class="bg-[#0f0f11] text-zinc-100 min-h-screen font-sans flex flex-col justify-between overflow-x-hidden">
 
-    <!-- Шапка -->
-    <header class="border-b border-zinc-800 bg-black/40 p-5 backdrop-blur-md">
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+    <header class="border-b border-zinc-800 bg-black/40 p-4 backdrop-blur-md z-10 relative">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             
-            <!-- Логотип и заголовок -->
             <div class="flex items-center gap-4">
-                <!-- Неоновая иконка (эмблема сайта) -->
                 <div class="flex-shrink-0 flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-tr from-cyan-500 to-purple-600 shadow-[0_0_15px_rgba(6,182,212,0.4)]">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
@@ -72,14 +95,16 @@
                         <path d="M2 12l10 5 10-5"></path>
                     </svg>
                 </div>
-                <!-- Текстовая часть -->
                 <div>
                     <h1 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-400 tracking-wider">Neuro Grafic</h1>
-                    <p class="text-xs text-zinc-400 mt-1">Оверлей только из настраиваемых рамок на 100% прозрачном фоне (9:16)</p>
+                    <p class="text-xs text-zinc-400 mt-1">Вертикальный оверлей на 100% прозрачном фоне (9:16)</p>
                 </div>
             </div>
 
             <div class="flex gap-3">
+                <button id="instruction-btn" class="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-lg transition-all text-sm tracking-wide border border-zinc-700">
+                    ИНСТРУКЦИЯ
+                </button>
                 <a id="download-btn" href="#" class="opacity-50 pointer-events-none px-6 py-3 bg-white hover:bg-zinc-200 text-black font-black rounded-lg transition-all text-sm tracking-wide pulse-glow flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -90,68 +115,96 @@
         </div>
     </header>
 
-    <!-- Основной контент -->
-    <main class="flex-1 max-w-6xl w-full mx-auto p-6 flex flex-col lg:flex-row gap-8 items-center justify-center">
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 flex flex-col lg:flex-row gap-6 items-start justify-center">
         
-        <!-- Левая часть: Предпросмотр -->
-        <div class="flex-1 w-full flex flex-col items-center select-none">
+        <div class="flex-1 w-full flex flex-col items-center select-none h-[78vh]">
             <h2 class="text-lg font-bold text-zinc-300 mb-3 flex items-center gap-2">
                 <span class="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>
-                Предпросмотр (все неподсвеченные зоны абсолютно прозрачны)
+                Предпросмотр (все неподсвеченные зоны прозрачны)
             </h2>
             
-            <!-- Окно просмотра с шахматной сеткой -->
-            <div class="checkerboard-bg border-4 border-zinc-800 rounded-2xl p-2 shadow-2xl relative overflow-hidden max-h-[65vh] aspect-[9/16] flex items-center justify-center cursor-default">
+            <div class="w-full h-full flex flex-row items-center gap-4">
                 
-                <!-- Встроенный SVG (будет динамически заполняться) -->
-                <svg id="overlay-svg" class="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920">
-                    <!-- Элементы создаются через JS -->
-                </svg>
+                <div class="h-full flex flex-col items-center py-4 px-2 bg-zinc-900/80 border border-zinc-800 rounded-2xl shadow-xl justify-between">
+                    <span class="text-white font-bold text-lg cursor-pointer hover:text-cyan-400" onclick="document.getElementById('preview-zoom').stepUp(); document.getElementById('preview-zoom').dispatchEvent(new Event('input'))" title="Увеличить">+</span>
+                    <input type="range" id="preview-zoom" min="0.1" max="1.5" step="0.05" value="0.35" class="zoom-slider flex-1 my-4 outline-none accent-cyan-400">
+                    <span class="text-white font-bold text-lg cursor-pointer hover:text-cyan-400" onclick="document.getElementById('preview-zoom').stepDown(); document.getElementById('preview-zoom').dispatchEvent(new Event('input'))" title="Уменьшить">-</span>
+                    <span id="zoom-val" class="text-[10px] text-zinc-300 font-bold mt-2 bg-zinc-800 px-2 py-1 rounded border border-zinc-700">35%</span>
+                </div>
+
+                <div class="flex-1 h-full overflow-auto bg-[#0a0a0c] border-4 border-zinc-800 rounded-2xl p-4 custom-scrollbar relative flex items-start justify-center">
+                    
+                    <div id="preview-container" class="checkerboard-bg shadow-[0_0_30px_rgba(0,0,0,0.8)] relative flex-shrink-0 transition-all duration-75" style="width: 378px; height: 672px;">
+                        <svg id="overlay-svg" class="w-full h-full absolute inset-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920">
+                            </svg>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Правая часть: Панель управления -->
-        <div class="w-full lg:w-[420px] bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 space-y-6 backdrop-blur-sm self-stretch flex flex-col justify-between">
-            <div class="space-y-6">
-                
-                <!-- Толщина обводки -->
-                <div class="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4">
-                    <h3 class="font-black text-white text-sm uppercase tracking-wider flex items-center gap-2">
-                        Настройка толщины
-                    </h3>
+        <div class="w-full lg:w-[420px] bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 space-y-6 backdrop-blur-sm flex flex-col h-[78vh] overflow-y-auto custom-scrollbar">
+            
+            <div class="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4 shrink-0">
+                <h3 class="font-black text-white text-sm uppercase tracking-wider flex items-center gap-2">
+                    Глобальный стиль
+                </h3>
+                <div class="space-y-4">
                     <div class="space-y-2">
                         <div class="flex justify-between text-xs font-mono text-zinc-400">
-                            <span>Толщина рамок (внутрь)</span>
+                            <span>Толщина всех рамок</span>
                             <span id="border-val" class="text-white font-bold">3 px</span>
                         </div>
                         <input id="border-slider" type="range" min="1" max="20" value="3" class="w-full accent-white cursor-pointer bg-zinc-800 rounded-lg h-1.5 appearance-none">
                     </div>
                 </div>
+            </div>
 
-                <!-- Управление рамками -->
-                <div class="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4">
-                    <h3 class="font-black text-white text-sm uppercase tracking-wider flex items-center gap-2">
-                        Управление рамками
-                    </h3>
+            <div class="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4 shrink-0">
+                <h3 class="font-black text-white text-sm uppercase tracking-wider flex items-center gap-2">
+                    Управление элементами
+                </h3>
+                
+                <div class="grid grid-cols-4 gap-2">
+                    <button id="add-rect-btn" class="bg-zinc-800 hover:bg-zinc-700 text-white text-[10px] font-bold py-2 rounded-lg transition-colors border border-zinc-700 uppercase">
+                        + Рамка
+                    </button>
+                    <button id="add-circ-btn" class="bg-zinc-800 hover:bg-zinc-700 text-white text-[10px] font-bold py-2 rounded-lg transition-colors border border-zinc-700 uppercase">
+                        + Круг
+                    </button>
+                    <button id="add-txt-btn" class="bg-zinc-800 hover:bg-cyan-900/50 hover:text-cyan-400 text-white text-[10px] font-bold py-2 rounded-lg transition-colors border border-zinc-700 hover:border-cyan-500/50 uppercase">
+                        + Текст
+                    </button>
+                    <button id="remove-btn" class="bg-red-900/30 hover:bg-red-900/50 text-red-400 text-[10px] font-bold py-2 rounded-lg transition-colors border border-red-900/50 uppercase">
+                        Удалить
+                    </button>
+                </div>
+
+                <div id="frame-props" class="space-y-3 opacity-50 pointer-events-none transition-opacity bg-black/20 p-3 rounded-lg border border-white/5">
                     
-                    <div class="flex gap-2">
-                        <button id="add-frame-btn" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold py-2.5 px-3 rounded-lg transition-colors border border-zinc-700">
-                            + Добавить
-                        </button>
-                        <button id="remove-frame-btn" class="flex-1 bg-red-900/30 hover:bg-red-900/50 text-red-400 text-xs font-bold py-2.5 px-3 rounded-lg transition-colors border border-red-900/50">
-                            Удалить
-                        </button>
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Свойства элемента</h4>
+                        <div class="flex gap-1">
+                            <button id="z-up" class="w-6 h-6 bg-zinc-800 rounded hover:bg-zinc-700 text-white flex items-center justify-center text-xs border border-zinc-700" title="На передний план">↑</button>
+                            <button id="z-down" class="w-6 h-6 bg-zinc-800 rounded hover:bg-zinc-700 text-white flex items-center justify-center text-xs border border-zinc-700" title="На задний план">↓</button>
+                        </div>
                     </div>
-
-                    <div id="frame-props" class="space-y-3 opacity-50 pointer-events-none transition-opacity bg-black/20 p-3 rounded-lg border border-white/5">
-                        <h4 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Свойства выделенной рамки</h4>
-                        
-                        <div class="flex flex-col gap-3">
-                            <div class="flex items-center gap-2">
-                                <label class="text-xs font-mono text-zinc-400">Цвет:</label>
-                                <input type="color" id="frame-color" value="#ffffff" class="w-8 h-8 rounded cursor-pointer bg-transparent outline-none">
+                    
+                    <div class="flex flex-col gap-3">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="flex items-center gap-2 bg-zinc-900/80 p-2 rounded border border-zinc-700">
+                                <label class="text-[10px] text-zinc-400 font-mono">Цвет:</label>
+                                <input type="color" id="frame-color" value="#ffffff" class="w-full h-6 rounded cursor-pointer bg-transparent outline-none">
                             </div>
-                            
+                            <div class="flex flex-col justify-center bg-zinc-900/80 p-2 rounded border border-zinc-700">
+                                <div class="flex justify-between text-[10px] text-zinc-400 font-mono mb-1">
+                                    <span>Свечение:</span>
+                                    <span id="glow-val" class="text-white font-bold">12</span>
+                                </div>
+                                <input id="glow-slider" type="range" min="0" max="30" value="12" class="w-full accent-white cursor-pointer h-1.5 appearance-none bg-zinc-700 rounded">
+                            </div>
+                        </div>
+                        
+                        <div id="prop-rect" class="space-y-3">
                             <div class="grid grid-cols-2 gap-2">
                                 <div class="flex items-center gap-2 bg-zinc-900/80 p-2 rounded border border-zinc-700">
                                     <label class="text-[10px] text-zinc-400 font-mono w-4">Ш:</label>
@@ -162,87 +215,241 @@
                                     <input type="number" id="frame-h" class="w-full bg-transparent text-white text-xs font-mono focus:outline-none">
                                 </div>
                             </div>
+                            <div class="flex items-center justify-between bg-zinc-900/80 p-2 rounded border border-zinc-700">
+                                <label class="text-[10px] text-zinc-400 font-mono">Скругление углов:</label>
+                                <input type="range" id="frame-rx" min="0" max="500" class="w-24 accent-white h-1 cursor-pointer">
+                            </div>
+                            
+                            <div class="flex flex-col gap-2 bg-zinc-900/80 p-2 rounded border border-zinc-700 mt-2">
+                                <label class="flex items-center gap-2 cursor-pointer text-xs text-white font-bold mb-1">
+                                    <input type="checkbox" id="frame-rec" class="accent-red-500 w-4 h-4 rounded cursor-pointer">
+                                    Включить индикатор REC
+                                </label>
+                                
+                                <div id="rec-settings" class="grid grid-cols-2 gap-2 transition-opacity">
+                                    <div class="flex flex-col gap-1">
+                                        <label class="text-[10px] text-zinc-400">Позиция:</label>
+                                        <select id="frame-rec-pos" class="w-full bg-zinc-800 text-white text-[10px] p-1.5 rounded outline-none border border-zinc-700 cursor-pointer">
+                                            <option value="tl">↖ Лев. Верх</option>
+                                            <option value="tr">↗ Прав. Верх</option>
+                                            <option value="bl">↙ Лев. Низ</option>
+                                            <option value="br">↘ Прав. Низ</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex flex-col gap-1">
+                                        <label class="text-[10px] text-zinc-400">Размер (Множитель):</label>
+                                        <input type="number" id="frame-rec-size" min="0.5" max="5" step="0.1" value="1" class="w-full bg-zinc-800 text-white text-[10px] p-1.5 rounded outline-none border border-zinc-700">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="text-[10px] text-zinc-400 font-mono leading-relaxed mt-2 border-t border-zinc-800/80 pt-2">
-                            • Тяните за рамку для перемещения<br>
-                            • Тяните за углы для изменения размера<br>
-                            • Используйте стрелки для сдвига (Shift = 10px)
+
+                        <div id="prop-text" class="space-y-3 hidden">
+                            <input type="text" id="frame-text-val" class="w-full bg-zinc-900/80 p-2 rounded border border-zinc-700 text-white text-xs focus:outline-none focus:border-cyan-500/50" placeholder="Ваш текст...">
+                            
+                            <div class="bg-zinc-900/80 p-1.5 rounded border border-zinc-700">
+                                <select id="frame-font-family" class="w-full bg-zinc-800 text-white text-xs p-1.5 rounded outline-none border border-zinc-700 cursor-pointer">
+                                    <option value="Inter" style="font-family: 'Inter'">Inter (Базовый)</option>
+                                    <option value="Roboto" style="font-family: 'Roboto'">Roboto</option>
+                                    <option value="Montserrat" style="font-family: 'Montserrat'">Montserrat (Широкий)</option>
+                                    <option value="Oswald" style="font-family: 'Oswald'">Oswald (Высокий)</option>
+                                    <option value="Open Sans" style="font-family: 'Open Sans'">Open Sans</option>
+                                    <option value="Raleway" style="font-family: 'Raleway'">Raleway</option>
+                                    <option value="Ubuntu" style="font-family: 'Ubuntu'">Ubuntu</option>
+                                    <option value="PT Sans" style="font-family: 'PT Sans'">PT Sans</option>
+                                    <option value="Caveat" style="font-family: 'Caveat'">Caveat (Рукописный)</option>
+                                    <option value="Press Start 2P" style="font-family: 'Press Start 2P'">Press Start 2P (Пиксельный)</option>
+                                    <option value="Comfortaa" style="font-family: 'Comfortaa'">Comfortaa (Округлый)</option>
+                                    <option value="Russo One" style="font-family: 'Russo One'">Russo One (Жирный)</option>
+                                    <option value="Jura" style="font-family: 'Jura'">Jura</option>
+                                    <option value="Neucha" style="font-family: 'Neucha'">Neucha (Комикс)</option>
+                                    <option value="Marck Script" style="font-family: 'Marck Script'">Marck Script (Каллиграфия)</option>
+                                    <option value="Philosopher" style="font-family: 'Philosopher'">Philosopher</option>
+                                    <option value="Kelly Slab" style="font-family: 'Kelly Slab'">Kelly Slab</option>
+                                    <option value="Yanone Kaffeesatz" style="font-family: 'Yanone Kaffeesatz'">Yanone Kaffeesatz</option>
+                                    <option value="Lobster" style="font-family: 'Lobster'">Lobster (Курсив)</option>
+                                    <option value="Rubik Mono One" style="font-family: 'Rubik Mono One'">Rubik Mono (Блочный)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="flex items-center gap-3 bg-zinc-900/80 p-2 rounded border border-zinc-700">
+                                <label class="text-[10px] text-zinc-400 w-12 font-bold">Размер:</label>
+                                <input type="range" id="frame-font-size-slider" min="10" max="300" step="1" class="w-full accent-cyan-400 h-1 cursor-pointer">
+                                <input type="number" id="frame-font-size" min="10" max="500" class="w-14 bg-zinc-800 text-white text-[10px] p-1.5 rounded outline-none border border-zinc-700 text-center font-mono">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 mt-1">
+                            <button id="align-center-x" class="text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 py-1.5 rounded transition-colors border border-zinc-700">↔ По центру X</button>
+                            <button id="align-center-y" class="text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 py-1.5 rounded transition-colors border border-zinc-700">↕ По центру Y</button>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Блок доната -->
-                <div class="bg-zinc-900/80 border border-zinc-800/80 rounded-xl p-4 text-center">
-                    <p class="text-xs text-zinc-400 mb-3 leading-relaxed">
-                        Этот проект полностью бесплатен! Если он вам помог и вы хотите поддержать автора, вы можете оставить чаевые по кнопке ниже ☕️
-                    </p>
-                    <a href="https://www.donationalerts.com/r/wz_casper" target="_blank" class="donate-btn inline-block w-full py-2 px-4 rounded-lg text-white font-bold text-sm tracking-wide shadow-lg">
-                        Поддержать проект
-                    </a>
+
+                    <div class="text-[10px] text-zinc-400 font-mono leading-relaxed mt-3 border-t border-zinc-800/80 pt-2">
+                        • Тяните за рамку или текст для перемещения<br>
+                        • Тяните за углы рамок для изменения размера<br>
+                        • Используйте стрелки клавиатуры для сдвига
+                    </div>
                 </div>
             </div>
-
-            <div class="pt-4 border-t border-zinc-800/80 text-center text-[10px] text-zinc-500 font-mono">
-                GENERATED VIA Neuro Grafic v1.0
+            
+            <div class="bg-zinc-900/80 border border-zinc-800/80 rounded-xl p-4 text-center shrink-0 mt-auto">
+                <p class="text-xs text-zinc-400 mb-3 leading-relaxed">
+                    Этот проект полностью бесплатен! Если он вам помог, вы можете оставить чаевые по кнопке ниже ☕️
+                </p>
+                <a href="https://www.donationalerts.com/r/wz_casper" target="_blank" class="donate-btn inline-block w-full py-2 px-4 rounded-lg text-white font-bold text-sm tracking-wide shadow-lg">
+                    Поддержать проект
+                </a>
             </div>
         </div>
 
     </main>
 
-    <!-- Подвал -->
-    <footer class="border-t border-zinc-900 bg-black/60 p-4 text-center text-xs text-zinc-500">
+    <footer class="border-t border-zinc-900 bg-black/60 p-4 text-center text-xs text-zinc-500 relative z-10">
         Neuro Grafic © 2026. Полностью автономный рендеринг в браузере by <a href="https://t.me/WZ_Casper" target="_blank" class="text-blue-400 hover:underline">亗 Casper</a>
     </footer>
 
-    <!-- Логика приложения -->
+    <!-- Модальное окно с инструкцией -->
+    <div id="instruction-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-2xl w-full p-8 shadow-2xl relative transform scale-95 transition-transform duration-300" id="instruction-content">
+            <button id="close-modal-btn" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 rounded-full text-zinc-400 hover:text-white transition-colors">
+                ✕
+            </button>
+            
+            <h2 class="text-2xl font-black text-white mb-6 border-b border-zinc-800 pb-4">Как добавить оверлей на стрим</h2>
+            
+            <div class="text-zinc-300 space-y-5 text-sm leading-relaxed">
+                <div class="flex gap-4 items-start">
+                    <div class="w-8 h-8 rounded-full bg-cyan-900/50 text-cyan-400 flex items-center justify-center font-bold shrink-0 border border-cyan-500/30">1</div>
+                    <div>
+                        <strong class="text-white block text-base mb-1">Создайте и скачайте</strong>
+                        Настройте рамки, цвета и свечение в этом редакторе. После этого нажмите кнопку <span class="bg-white text-black px-2 py-0.5 rounded text-xs font-bold mx-1">СКАЧАТЬ ПРОЗРАЧНЫЙ PNG</span>. Изображение сохранится на ваш компьютер без заднего фона.
+                    </div>
+                </div>
+
+                <div class="flex gap-4 items-start">
+                    <div class="w-8 h-8 rounded-full bg-purple-900/50 text-purple-400 flex items-center justify-center font-bold shrink-0 border border-purple-500/30">2</div>
+                    <div>
+                        <strong class="text-white block text-base mb-1">Добавьте в TikTok Live Studio / OBS</strong>
+                        Откройте вашу программу для стриминга. В панели источников (Sources) нажмите кнопку <strong class="text-white">+ Добавить источник</strong> и выберите пункт <strong class="text-white">Изображение (Image)</strong>.
+                    </div>
+                </div>
+
+                <div class="flex gap-4 items-start">
+                    <div class="w-8 h-8 rounded-full bg-emerald-900/50 text-emerald-400 flex items-center justify-center font-bold shrink-0 border border-emerald-500/30">3</div>
+                    <div>
+                        <strong class="text-white block text-base mb-1">Поместите на передний план (Важно!)</strong>
+                        Выберите скачанный файл <code class="bg-zinc-800 px-1 py-0.5 rounded text-xs">stream_vertical_overlay.png</code>. Обязательно перетащите этот источник в <strong>САМЫЙ ВЕРХ</strong> списка слоёв! 
+                        <br><br>
+                        <span class="text-zinc-400 italic">Это необходимо для того, чтобы рамки оверлея красиво накладывались поверх вашей веб-камеры, игры и захвата экрана, скрывая их неровные края, как и было задумано в редакторе.</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-4 border-t border-zinc-800 text-center">
+                <button id="understand-btn" class="px-8 py-2.5 bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-bold rounded-lg transition-all shadow-lg">
+                    Понятно, спасибо!
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         window.addEventListener('load', () => {
             const svgOverlay = document.getElementById('overlay-svg');
             const downloadBtn = document.getElementById('download-btn');
+            const previewZoom = document.getElementById('preview-zoom');
+            const zoomVal = document.getElementById('zoom-val');
+            const previewContainer = document.getElementById('preview-container');
+            
+            // Настройки глобальные
             const borderSlider = document.getElementById('border-slider');
             const borderVal = document.getElementById('border-val');
-            
+
             const svgNS = "http://www.w3.org/2000/svg";
             
-            // Начальное состояние
             let globalStrokeWidth = parseInt(borderSlider.value) || 3;
-            let frames = [
-                { id: 'minimap', x: 30, y: 30, w: 500, h: 430, color: '#ffffff' },
-                { id: 'webcam', x: 550, y: 30, w: 500, h: 430, color: '#ffffff' },
-                { id: 'hud', x: 217.5, y: 480, w: 645, h: 70, color: '#ffffff' },
-                { id: 'separator', x: 0, y: 573, w: 1080, h: 6, color: '#ffffff' }
+
+            // Базовые элементы с добавленным свойством glow для каждого
+            let elements = [
+                { id: 'webcam', type: 'rect', x: 290, y: 150, w: 500, h: 500, color: '#00f0ff', rx: 250, rec: true, recPos: 'tl', recSize: 1.2, glow: 15 }, 
+                { id: 'game', type: 'rect', x: 40, y: 700, w: 1000, h: 562, color: '#ffffff', rx: 12, rec: false, recPos: 'tl', recSize: 1, glow: 10 }, 
+                { id: 'title', type: 'text', x: 540, y: 1350, text: 'МОЙ СТРИМ', color: '#ff0055', fontSize: 60, fontFamily: 'Russo One', glow: 15 },
+                { id: 'social', type: 'text', x: 540, y: 1440, text: '@wz_casper', color: '#cccccc', fontSize: 30, fontFamily: 'Inter', glow: 5 }
             ];
 
             let selectedFrameId = null;
             let dragFrame = null;
-            let resizeHandle = null; // Текущий маркер изменения размера ('nw', 'n', 'ne', etc.)
+            let resizeHandle = null; 
             let offsetX = 0, offsetY = 0;
             let renderTimeout;
-
-            // Размеры маркеров для изменения размера
             const handleSize = 12;
 
+            // Модальное окно
+            const modal = document.getElementById('instruction-modal');
+            const modalContent = document.getElementById('instruction-content');
+            const openModalBtn = document.getElementById('instruction-btn');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const understandBtn = document.getElementById('understand-btn');
+
+            function openModal() {
+                modal.classList.remove('hidden');
+                // Небольшая задержка для анимации opacity
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    modalContent.classList.remove('scale-95');
+                }, 10);
+            }
+
+            function closeModal() {
+                modal.classList.add('opacity-0');
+                modalContent.classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+
+            openModalBtn.addEventListener('click', openModal);
+            closeModalBtn.addEventListener('click', closeModal);
+            understandBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+
+            // Логика Зума (Масштабирования предпросмотра)
+            previewZoom.addEventListener('input', (e) => {
+                const z = parseFloat(e.target.value);
+                zoomVal.innerText = Math.round(z * 100) + '%';
+                // Т.к. базовое разрешение 1080x1920, пропорционально меняем размер контейнера
+                previewContainer.style.width = (1080 * z) + 'px';
+                previewContainer.style.height = (1920 * z) + 'px';
+            });
+            // Инициализация зума
+            previewZoom.dispatchEvent(new Event('input'));
+
+            // Получение точных координат мыши на SVG не зависимо от Зума
             function getMouseCoords(evt) {
                 const pt = svgOverlay.createSVGPoint();
                 pt.x = evt.clientX;
                 pt.y = evt.clientY;
+                // getScreenCTM() идеален, так как учитывает текущий CSS-размер и ViewBox
                 const svgP = pt.matrixTransform(svgOverlay.getScreenCTM().inverse());
                 return { x: svgP.x, y: svgP.y };
             }
 
-            // Создание маркеров (handles) для изменения размера
-            function createResizeHandles(f, g) {
+            // Маркеры размера (только для rect/кругов)
+            function createResizeHandles(el, g) {
+                if(el.type !== 'rect') return;
                 const positions = [
-                    { dir: 'nw', cx: f.x, cy: f.y },
-                    { dir: 'n', cx: f.x + f.w/2, cy: f.y },
-                    { dir: 'ne', cx: f.x + f.w, cy: f.y },
-                    { dir: 'e', cx: f.x + f.w, cy: f.y + f.h/2 },
-                    { dir: 'se', cx: f.x + f.w, cy: f.y + f.h },
-                    { dir: 's', cx: f.x + f.w/2, cy: f.y + f.h },
-                    { dir: 'sw', cx: f.x, cy: f.y + f.h },
-                    { dir: 'w', cx: f.x, cy: f.y + f.h/2 }
+                    { dir: 'nw', cx: el.x, cy: el.y },
+                    { dir: 'n', cx: el.x + el.w/2, cy: el.y },
+                    { dir: 'ne', cx: el.x + el.w, cy: el.y },
+                    { dir: 'e', cx: el.x + el.w, cy: el.y + el.h/2 },
+                    { dir: 'se', cx: el.x + el.w, cy: el.y + el.h },
+                    { dir: 's', cx: el.x + el.w/2, cy: el.y + el.h },
+                    { dir: 'sw', cx: el.x, cy: el.y + el.h },
+                    { dir: 'w', cx: el.x, cy: el.y + el.h/2 }
                 ];
-
                 positions.forEach(pos => {
                     const rect = document.createElementNS(svgNS, 'rect');
                     rect.setAttribute('x', pos.cx - handleSize/2);
@@ -251,22 +458,15 @@
                     rect.setAttribute('height', handleSize);
                     rect.setAttribute('class', `resize-handle ${pos.dir}`);
                     rect.dataset.dir = pos.dir;
-                    rect.dataset.frameId = f.id;
-                    
-                    rect.addEventListener('mousedown', (e) => {
-                        e.stopPropagation();
-                        startResize(e, f, pos.dir);
-                    });
-                    
+                    rect.addEventListener('mousedown', (e) => { e.stopPropagation(); startResize(e, el, pos.dir); });
                     g.appendChild(rect);
                 });
             }
 
-            // Рендер элементов в SVG
+            // Главная отрисовка
             function updateSVG() {
                 svgOverlay.innerHTML = '';
                 
-                // Прозрачный фон
                 const bgRect = document.createElementNS(svgNS, 'rect');
                 bgRect.setAttribute('id', 'bg-click-catcher');
                 bgRect.setAttribute('width', 1080);
@@ -280,118 +480,214 @@
                 svgOverlay.appendChild(bgRect);
 
                 const defs = document.createElementNS(svgNS, 'defs');
+                
+                // Вшиваем шрифты (все 20) и стили REC для корректного экспорта на Canvas
+                const styleDef = document.createElementNS(svgNS, 'style');
+                styleDef.textContent = `
+                    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Comfortaa:wght@400;700&family=Inter:wght@400;700&family=Jura:wght@400;700&family=Kelly+Slab&family=Lobster&family=Marck+Script&family=Montserrat:wght@400;700&family=Neucha&family=Open+Sans:wght@400;700&family=Oswald:wght@400;700&family=PT+Sans:wght@400;700&family=Philosopher:wght@400;700&family=Press+Start+2P&family=Raleway:wght@400;700&family=Roboto:wght@400;700&family=Rubik+Mono+One&family=Russo+One&family=Ubuntu:wght@400;700&family=Yanone+Kaffeesatz:wght@400;700&display=swap');
+                    .animate-pulse-fast { animation: pulseREC 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+                    @keyframes pulseREC { 0%, 100% { opacity: 1; } 50% { opacity: .2; } }
+                `;
+                defs.appendChild(styleDef);
+
+                // Создаем индивидуальные фильтры свечения для каждого элемента
+                elements.forEach(el => {
+                    if (el.glow > 0) {
+                        const filter = document.createElementNS(svgNS, 'filter');
+                        filter.setAttribute('id', `glow-${el.id}`);
+                        filter.setAttribute('x', '-50%'); filter.setAttribute('y', '-50%');
+                        filter.setAttribute('width', '200%'); filter.setAttribute('height', '200%');
+                        
+                        const feG = document.createElementNS(svgNS, 'feGaussianBlur');
+                        feG.setAttribute('in', 'SourceGraphic');
+                        feG.setAttribute('stdDeviation', el.glow);
+                        feG.setAttribute('result', 'blur');
+                        
+                        const feM = document.createElementNS(svgNS, 'feMerge');
+                        const fM1 = document.createElementNS(svgNS, 'feMergeNode'); fM1.setAttribute('in', 'blur');
+                        const fM2 = document.createElementNS(svgNS, 'feMergeNode'); fM2.setAttribute('in', 'SourceGraphic');
+                        
+                        feM.appendChild(fM1); feM.appendChild(fM2);
+                        filter.appendChild(feG); filter.appendChild(feM);
+                        defs.appendChild(filter);
+                    }
+                });
+
+                svgOverlay.appendChild(defs);
+
                 const framesGroup = document.createElementNS(svgNS, 'g');
                 const handlesGroup = document.createElementNS(svgNS, 'g');
                 handlesGroup.setAttribute('id', 'handles-group');
                 
-                frames.forEach(f => {
-                    const clipPath = document.createElementNS(svgNS, 'clipPath');
-                    clipPath.setAttribute('id', `clip-${f.id}`);
-                    const clipRect = document.createElementNS(svgNS, 'rect');
-                    clipRect.setAttribute('x', f.x);
-                    clipRect.setAttribute('y', f.y);
-                    clipRect.setAttribute('width', f.w);
-                    clipRect.setAttribute('height', f.h);
-                    clipRect.setAttribute('rx', 4);
-                    clipPath.appendChild(clipRect);
-                    defs.appendChild(clipPath);
-                    
-                    const rect = document.createElementNS(svgNS, 'rect');
-                    rect.setAttribute('x', f.x);
-                    rect.setAttribute('y', f.y);
-                    rect.setAttribute('width', f.w);
-                    rect.setAttribute('height', f.h);
-                    rect.setAttribute('fill', f.id === selectedFrameId ? 'rgba(255, 255, 255, 0.15)' : 'none');
-                    rect.setAttribute('stroke', f.color || '#ffffff');
-                    rect.setAttribute('stroke-width', globalStrokeWidth * 2);
-                    rect.setAttribute('rx', 4);
-                    rect.setAttribute('clip-path', `url(#clip-${f.id})`);
-                    rect.setAttribute('class', 'hud-border cursor-move');
-                    rect.dataset.id = f.id;
-                    
-                    rect.addEventListener('mousedown', (e) => {
-                        e.stopPropagation();
-                        startDrag(e, f);
-                    });
-                    
-                    framesGroup.appendChild(rect);
+                elements.forEach(el => {
+                    if (el.type === 'rect') {
+                        const rect = document.createElementNS(svgNS, 'rect');
+                        rect.setAttribute('x', el.x);
+                        rect.setAttribute('y', el.y);
+                        rect.setAttribute('width', el.w);
+                        rect.setAttribute('height', el.h);
+                        // Заливка всегда отключена, чтобы квадрат не мешал
+                        rect.setAttribute('fill', 'none');
+                        rect.setAttribute('stroke', el.color);
+                        rect.setAttribute('stroke-width', globalStrokeWidth * 2);
+                        rect.setAttribute('rx', el.rx || 0);
+                        
+                        if (el.glow > 0) rect.setAttribute('filter', `url(#glow-${el.id})`);
+                        
+                        // Если элемент выбран, добавляем класс для лучшего захвата курсором даже если внутри прозрачно
+                        // Для этого рисуем скрытый прямоугольник-перехватчик событий, чтобы можно было тянуть за центр прозрачной области
+                        if (el.id === selectedFrameId) {
+                            const grabRect = document.createElementNS(svgNS, 'rect');
+                            grabRect.setAttribute('x', el.x); grabRect.setAttribute('y', el.y);
+                            grabRect.setAttribute('width', el.w); grabRect.setAttribute('height', el.h);
+                            grabRect.setAttribute('fill', 'transparent'); 
+                            grabRect.setAttribute('class', 'cursor-move');
+                            grabRect.addEventListener('mousedown', (e) => { e.stopPropagation(); startDrag(e, el); });
+                            framesGroup.appendChild(grabRect);
+                            
+                            createResizeHandles(el, handlesGroup);
+                        }
 
-                    // Отрисовываем "ручки" для выделенной рамки
-                    if (f.id === selectedFrameId) {
-                        createResizeHandles(f, handlesGroup);
+                        rect.setAttribute('class', 'hud-border cursor-move');
+                        rect.dataset.id = el.id;
+                        rect.addEventListener('mousedown', (e) => { e.stopPropagation(); startDrag(e, el); });
+                        
+                        framesGroup.appendChild(rect);
+
+                        // Индикатор REC (Настраиваемый угол и размер)
+                        if (el.rec) {
+                            const recPos = el.recPos || 'tl';
+                            const recSize = parseFloat(el.recSize) || 1;
+                            
+                            const rBaseRadius = 6;
+                            const rBaseFontSize = 13;
+                            
+                            const dotR = rBaseRadius * recSize;
+                            const textSz = rBaseFontSize * recSize;
+                            const pad = 18 * recSize; 
+                            
+                            // Приблизительная ширина текста REC (3 символа)
+                            const textWidth = textSz * 0.65 * 3;
+                            // общая ширина = (диаметр круга) + (отступ) + (ширина текста)
+                            const totalWidth = (dotR * 2) + (4 * recSize) + textWidth; 
+                            const totalHeight = Math.max(dotR * 2, textSz);
+
+                            let gX = 0, gY = 0;
+                            
+                            if (recPos === 'tl') {
+                                gX = el.x + pad; gY = el.y + pad;
+                            } else if (recPos === 'tr') {
+                                gX = el.x + el.w - pad - totalWidth; gY = el.y + pad;
+                            } else if (recPos === 'bl') {
+                                gX = el.x + pad; gY = el.y + el.h - pad - totalHeight;
+                            } else if (recPos === 'br') {
+                                gX = el.x + el.w - pad - totalWidth; gY = el.y + el.h - pad - totalHeight;
+                            }
+                            
+                            const recGroup = document.createElementNS(svgNS, 'g');
+                            recGroup.setAttribute('transform', `translate(${gX}, ${gY})`);
+                            
+                            const recDot = document.createElementNS(svgNS, 'circle');
+                            recDot.setAttribute('cx', dotR.toString()); 
+                            recDot.setAttribute('cy', dotR.toString()); 
+                            recDot.setAttribute('r', dotR.toString());
+                            recDot.setAttribute('fill', '#ef4444');
+                            recDot.setAttribute('class', 'animate-pulse-fast');
+                            
+                            const recText = document.createElementNS(svgNS, 'text');
+                            recText.setAttribute('x', (dotR * 2 + (4 * recSize)).toString());
+                            // Выравнивание текста по высоте круга
+                            recText.setAttribute('y', (dotR + textSz/2.8).toString()); 
+                            recText.setAttribute('fill', '#ef4444');
+                            recText.setAttribute('font-family', 'Inter, sans-serif');
+                            recText.setAttribute('font-size', textSz + 'px');
+                            recText.setAttribute('font-weight', 'bold');
+                            recText.textContent = 'REC';
+
+                            recGroup.appendChild(recDot);
+                            recGroup.appendChild(recText);
+                            framesGroup.appendChild(recGroup);
+                        }
+                    
+                    } else if (el.type === 'text') {
+                        const txt = document.createElementNS(svgNS, 'text');
+                        txt.setAttribute('x', el.x);
+                        txt.setAttribute('y', el.y);
+                        txt.setAttribute('fill', el.color);
+                        txt.setAttribute('font-family', el.fontFamily + ', sans-serif');
+                        txt.setAttribute('font-size', el.fontSize);
+                        txt.setAttribute('font-weight', 'bold');
+                        txt.setAttribute('text-anchor', 'middle'); 
+                        txt.setAttribute('dominant-baseline', 'hanging');
+                        
+                        if (el.glow > 0) txt.setAttribute('filter', `url(#glow-${el.id})`);
+                        
+                        txt.textContent = el.text;
+                        txt.setAttribute('class', 'hud-text cursor-move');
+                        txt.dataset.id = el.id;
+                        
+                        // Выделение текста тоже убрано, ориентируемся на панель свойств
+                        
+                        txt.addEventListener('mousedown', (e) => { e.stopPropagation(); startDrag(e, el); });
+                        framesGroup.appendChild(txt);
                     }
                 });
                 
-                svgOverlay.appendChild(defs);
                 svgOverlay.appendChild(framesGroup);
                 svgOverlay.appendChild(handlesGroup);
                 
                 const guideG = document.createElementNS(svgNS, 'g');
                 guideG.setAttribute('id', 'guides');
                 svgOverlay.appendChild(guideG);
-                
+
                 scheduleRenderPNG();
-            }
-
-            // Быстрое обновление DOM 
-            function updateFrameDOM(f) {
-                const rect = svgOverlay.querySelector(`rect[data-id="${f.id}"]`);
-                const clipRect = document.getElementById(`clip-${f.id}`)?.querySelector('rect');
-                
-                if (rect) {
-                    rect.setAttribute('x', f.x);
-                    rect.setAttribute('y', f.y);
-                    rect.setAttribute('width', f.w);
-                    rect.setAttribute('height', f.h);
-                    rect.setAttribute('stroke', f.color || '#ffffff');
-                    rect.setAttribute('stroke-width', globalStrokeWidth * 2);
-                    rect.setAttribute('fill', f.id === selectedFrameId ? 'rgba(255,255,255,0.15)' : 'none');
-                }
-                if (clipRect) {
-                    clipRect.setAttribute('x', f.x);
-                    clipRect.setAttribute('y', f.y);
-                    clipRect.setAttribute('width', f.w);
-                    clipRect.setAttribute('height', f.h);
-                }
-
-                // Обновляем "ручки" если это выделенная рамка
-                if (f.id === selectedFrameId) {
-                    const handles = svgOverlay.querySelectorAll('.resize-handle');
-                    handles.forEach(h => {
-                        const dir = h.dataset.dir;
-                        let hx = f.x, hy = f.y;
-                        
-                        if(dir.includes('e')) hx += f.w;
-                        else if(!dir.includes('w')) hx += f.w/2;
-                        
-                        if(dir.includes('s')) hy += f.h;
-                        else if(!dir.includes('n')) hy += f.h/2;
-                        
-                        h.setAttribute('x', hx - handleSize/2);
-                        h.setAttribute('y', hy - handleSize/2);
-                    });
-                }
             }
 
             function updatePropsUI() {
                 const propsDiv = document.getElementById('frame-props');
-                const wInput = document.getElementById('frame-w');
-                const hInput = document.getElementById('frame-h');
-                
-                if (selectedFrameId) {
-                    const f = frames.find(fr => fr.id === selectedFrameId);
-                    if (f) {
-                        propsDiv.classList.remove('opacity-50', 'pointer-events-none');
-                        document.getElementById('frame-color').value = f.color;
-                        
-                        // Если поля не в фокусе - обновляем их значения
-                        if (document.activeElement !== wInput) wInput.value = Math.round(f.w);
-                        if (document.activeElement !== hInput) hInput.value = Math.round(f.h);
-                    }
-                } else {
+                if (!selectedFrameId) {
                     propsDiv.classList.add('opacity-50', 'pointer-events-none');
-                    wInput.value = '';
-                    hInput.value = '';
+                    return;
+                }
+                propsDiv.classList.remove('opacity-50', 'pointer-events-none');
+                
+                const el = elements.find(fr => fr.id === selectedFrameId);
+                
+                // Обновление общих свойств (Цвет, Свечение)
+                document.getElementById('frame-color').value = el.color;
+                document.getElementById('glow-slider').value = el.glow !== undefined ? el.glow : 12;
+                document.getElementById('glow-val').innerText = el.glow !== undefined ? el.glow : 12;
+
+                const pRect = document.getElementById('prop-rect');
+                const pText = document.getElementById('prop-text');
+
+                if (el.type === 'rect') {
+                    pRect.classList.remove('hidden'); pText.classList.add('hidden');
+                    if (document.activeElement !== document.getElementById('frame-w')) document.getElementById('frame-w').value = Math.round(el.w);
+                    if (document.activeElement !== document.getElementById('frame-h')) document.getElementById('frame-h').value = Math.round(el.h);
+                    document.getElementById('frame-rx').value = el.rx || 0;
+                    
+                    // Обновление REC
+                    document.getElementById('frame-rec').checked = el.rec || false;
+                    document.getElementById('frame-rec-pos').value = el.recPos || 'tl';
+                    document.getElementById('frame-rec-size').value = el.recSize || 1;
+                    
+                    if (el.rec) {
+                        document.getElementById('rec-settings').classList.remove('opacity-50', 'pointer-events-none');
+                    } else {
+                        document.getElementById('rec-settings').classList.add('opacity-50', 'pointer-events-none');
+                    }
+
+                } else if (el.type === 'text') {
+                    pRect.classList.add('hidden'); pText.classList.remove('hidden');
+                    if (document.activeElement !== document.getElementById('frame-text-val')) document.getElementById('frame-text-val').value = el.text;
+                    document.getElementById('frame-font-family').value = el.fontFamily;
+                    
+                    // Синхронизация слайдера и поля ввода размера текста
+                    if (document.activeElement !== document.getElementById('frame-font-size') && document.activeElement !== document.getElementById('frame-font-size-slider')) {
+                        document.getElementById('frame-font-size').value = el.fontSize;
+                        document.getElementById('frame-font-size-slider').value = el.fontSize;
+                    }
                 }
             }
 
@@ -401,101 +697,69 @@
                 guideG.innerHTML = '';
                 lines.forEach(l => {
                     const line = document.createElementNS(svgNS, 'line');
-                    line.setAttribute('x1', l.x1);
-                    line.setAttribute('y1', l.y1);
-                    line.setAttribute('x2', l.x2);
-                    line.setAttribute('y2', l.y2);
-                    line.setAttribute('stroke', '#00f0ff');
-                    line.setAttribute('stroke-width', '1.5');
+                    line.setAttribute('x1', l.x1); line.setAttribute('y1', l.y1);
+                    line.setAttribute('x2', l.x2); line.setAttribute('y2', l.y2);
+                    line.setAttribute('stroke', '#00f0ff'); line.setAttribute('stroke-width', '1.5');
                     line.setAttribute('stroke-dasharray', '8,4');
                     guideG.appendChild(line);
                 });
             }
 
-            // --- Логика перетаскивания (Drag) ---
-            function startDrag(evt, frame) {
-                if (resizeHandle) return; // Если уже ресайзим, не драгаем
-                
-                dragFrame = frame;
-                selectedFrameId = frame.id;
-                
+            // Перетаскивание
+            function startDrag(evt, el) {
+                if (resizeHandle) return; 
+                dragFrame = el;
+                selectedFrameId = el.id;
                 updatePropsUI();
                 updateSVG(); 
-                
                 const coords = getMouseCoords(evt);
-                offsetX = coords.x - frame.x;
-                offsetY = coords.y - frame.y;
+                offsetX = coords.x - el.x;
+                offsetY = coords.y - el.y;
             }
 
-            // --- Логика изменения размера (Resize) ---
-            function startResize(evt, frame, dir) {
-                dragFrame = frame; // Используем ту же переменную
+            // Ресайз рамок
+            function startResize(evt, el, dir) {
+                dragFrame = el; 
                 resizeHandle = dir;
-                selectedFrameId = frame.id;
-                
+                selectedFrameId = el.id;
                 const coords = getMouseCoords(evt);
-                offsetX = coords.x; // Сохраняем начальные координаты мыши
-                offsetY = coords.y;
-                
-                // Сохраняем исходные параметры рамки для вычислений
-                dragFrame._startX = dragFrame.x;
-                dragFrame._startY = dragFrame.y;
-                dragFrame._startW = dragFrame.w;
-                dragFrame._startH = dragFrame.h;
+                offsetX = coords.x; offsetY = coords.y;
+                dragFrame._startX = dragFrame.x; dragFrame._startY = dragFrame.y;
+                dragFrame._startW = dragFrame.w; dragFrame._startH = dragFrame.h;
             }
 
             window.addEventListener('mousemove', (evt) => {
                 if (!dragFrame) return;
-                
                 const coords = getMouseCoords(evt);
 
-                if (resizeHandle) {
-                    // Режим изменения размера
-                    const dx = coords.x - offsetX;
-                    const dy = coords.y - offsetY;
-                    
-                    let newX = dragFrame._startX;
-                    let newY = dragFrame._startY;
-                    let newW = dragFrame._startW;
-                    let newH = dragFrame._startH;
+                if (resizeHandle && dragFrame.type === 'rect') {
+                    const dx = coords.x - offsetX; const dy = coords.y - offsetY;
+                    let newX = dragFrame._startX, newY = dragFrame._startY;
+                    let newW = dragFrame._startW, newH = dragFrame._startH;
 
                     if (resizeHandle.includes('e')) newW += dx;
                     if (resizeHandle.includes('w')) { newW -= dx; newX += dx; }
                     if (resizeHandle.includes('s')) newH += dy;
                     if (resizeHandle.includes('n')) { newH -= dy; newY += dy; }
 
-                    // Ограничение минимального размера
-                    const minSize = 10;
-                    if (newW < minSize) { newW = minSize; if (resizeHandle.includes('w')) newX = dragFrame._startX + dragFrame._startW - minSize; }
-                    if (newH < minSize) { newH = minSize; if (resizeHandle.includes('n')) newY = dragFrame._startY + dragFrame._startH - minSize; }
+                    if (newW < 20) { newW = 20; if (resizeHandle.includes('w')) newX = dragFrame._startX + dragFrame._startW - 20; }
+                    if (newH < 20) { newH = 20; if (resizeHandle.includes('n')) newY = dragFrame._startY + dragFrame._startH - 20; }
 
-                    dragFrame.x = newX;
-                    dragFrame.y = newY;
-                    dragFrame.w = newW;
-                    dragFrame.h = newH;
-                    
-                    updateFrameDOM(dragFrame);
+                    dragFrame.x = newX; dragFrame.y = newY; dragFrame.w = newW; dragFrame.h = newH;
+                    updateSVG();
                     updatePropsUI();
                     
                 } else {
-                    // Режим перетаскивания (с прилипанием)
                     let newX = coords.x - offsetX;
                     let newY = coords.y - offsetY;
-
                     const threshold = 15;
-                    const pX = [newX, newX + dragFrame.w / 2, newX + dragFrame.w];
-                    const pY = [newY, newY + dragFrame.h / 2, newY + dragFrame.h];
-
+                    
+                    let pX = dragFrame.type === 'text' ? [newX] : [newX, newX + dragFrame.w / 2, newX + dragFrame.w];
+                    let pY = dragFrame.type === 'text' ? [newY] : [newY, newY + dragFrame.h / 2, newY + dragFrame.h];
+                    
                     const targetX = [0, 540, 1080];
                     const targetY = [0, 960, 1920];
                     
-                    frames.forEach(f => {
-                        if (f.id !== dragFrame.id) {
-                            targetX.push(f.x, f.x + f.w/2, f.x + f.w);
-                            targetY.push(f.y, f.y + f.h/2, f.y + f.h);
-                        }
-                    });
-
                     let snappedX = false, snappedY = false;
                     let guides = [];
 
@@ -509,7 +773,6 @@
                         }
                         if(snappedX) break;
                     }
-
                     for (let py of pY) {
                         for (let ty of targetY) {
                             if (Math.abs(py - ty) < threshold) {
@@ -524,7 +787,7 @@
                     dragFrame.x = Math.round(newX);
                     dragFrame.y = Math.round(newY);
                     
-                    updateFrameDOM(dragFrame);
+                    updateSVG();
                     updatePropsUI();
                     drawGuides(guides);
                 }
@@ -532,127 +795,178 @@
 
             window.addEventListener('mouseup', () => {
                 if (dragFrame) {
-                    dragFrame = null;
-                    resizeHandle = null;
+                    dragFrame = null; resizeHandle = null;
                     drawGuides([]);
                     scheduleRenderPNG();
                 }
             });
 
-            // Управление с клавиатуры
+            // Клавиатура
             window.addEventListener('keydown', (e) => {
-                if (!selectedFrameId || e.target.tagName === 'INPUT') return;
-                
+                if (!selectedFrameId || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
                 const keys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
                 if (!keys.includes(e.key)) return;
-                
                 e.preventDefault();
-                const f = frames.find(fr => fr.id === selectedFrameId);
-                if (!f) return;
-                
+                const el = elements.find(fr => fr.id === selectedFrameId);
                 const step = e.shiftKey ? 10 : 1;
-                if (e.key === 'ArrowUp') f.y -= step;
-                if (e.key === 'ArrowDown') f.y += step;
-                if (e.key === 'ArrowLeft') f.x -= step;
-                if (e.key === 'ArrowRight') f.x += step;
-                
-                updateFrameDOM(f);
-                scheduleRenderPNG();
-            });
-
-            // События UI
-            document.getElementById('add-frame-btn').addEventListener('click', () => {
-                const newId = 'frame_' + Date.now();
-                frames.push({
-                    id: newId,
-                    x: 540 - 200, y: 960 - 150,
-                    w: 400, h: 300, color: '#ffffff'
-                });
-                selectedFrameId = newId;
-                updatePropsUI();
+                if (e.key === 'ArrowUp') el.y -= step;
+                if (e.key === 'ArrowDown') el.y += step;
+                if (e.key === 'ArrowLeft') el.x -= step;
+                if (e.key === 'ArrowRight') el.x += step;
                 updateSVG();
             });
 
-            document.getElementById('remove-frame-btn').addEventListener('click', () => {
+            // Кнопки добавления (с дефолтным свечением)
+            document.getElementById('add-rect-btn').addEventListener('click', () => {
+                const newId = 'el_' + Date.now();
+                elements.push({ id: newId, type: 'rect', x: 340, y: 810, w: 400, h: 300, color: '#ffffff', rx: 4, rec: false, recPos: 'tl', recSize: 1, glow: 12 });
+                selectedFrameId = newId; updatePropsUI(); updateSVG();
+            });
+            document.getElementById('add-circ-btn').addEventListener('click', () => {
+                const newId = 'el_' + Date.now();
+                elements.push({ id: newId, type: 'rect', x: 390, y: 810, w: 300, h: 300, color: '#ffffff', rx: 150, rec: false, recPos: 'tl', recSize: 1, glow: 12 });
+                selectedFrameId = newId; updatePropsUI(); updateSVG();
+            });
+            document.getElementById('add-txt-btn').addEventListener('click', () => {
+                const newId = 'el_' + Date.now();
+                elements.push({ id: newId, type: 'text', x: 540, y: 960, text: 'НОВЫЙ ТЕКСТ', color: '#ffffff', fontSize: 60, fontFamily: 'Inter', glow: 12 });
+                selectedFrameId = newId; updatePropsUI(); updateSVG();
+            });
+            
+            document.getElementById('remove-btn').addEventListener('click', () => {
                 if (!selectedFrameId) return;
-                frames = frames.filter(f => f.id !== selectedFrameId);
-                selectedFrameId = null;
-                updatePropsUI();
+                elements = elements.filter(e => e.id !== selectedFrameId);
+                selectedFrameId = null; updatePropsUI(); updateSVG();
+            });
+
+            // Слои (Z-Index)
+            document.getElementById('z-up').addEventListener('click', () => {
+                if (!selectedFrameId) return;
+                const idx = elements.findIndex(e => e.id === selectedFrameId);
+                if (idx < elements.length - 1) {
+                    const temp = elements[idx]; elements[idx] = elements[idx+1]; elements[idx+1] = temp;
+                    updateSVG();
+                }
+            });
+            document.getElementById('z-down').addEventListener('click', () => {
+                if (!selectedFrameId) return;
+                const idx = elements.findIndex(e => e.id === selectedFrameId);
+                if (idx > 0) {
+                    const temp = elements[idx]; elements[idx] = elements[idx-1]; elements[idx-1] = temp;
+                    updateSVG();
+                }
+            });
+
+            // Выравнивание
+            document.getElementById('align-center-x').addEventListener('click', () => {
+                if (!selectedFrameId) return;
+                const el = elements.find(e => e.id === selectedFrameId);
+                if(el.type === 'rect') el.x = 540 - el.w / 2;
+                if(el.type === 'text') el.x = 540;
+                updateSVG();
+            });
+            document.getElementById('align-center-y').addEventListener('click', () => {
+                if (!selectedFrameId) return;
+                const el = elements.find(e => e.id === selectedFrameId);
+                if(el.type === 'rect') el.y = 960 - el.h / 2;
+                if(el.type === 'text') el.y = 960;
                 updateSVG();
             });
 
+            // Глобальные слайдеры
             borderSlider.addEventListener('input', (e) => {
-                globalStrokeWidth = parseInt(e.target.value);
-                borderVal.innerText = `${globalStrokeWidth} px`;
-                frames.forEach(f => updateFrameDOM(f));
-                scheduleRenderPNG();
+                globalStrokeWidth = parseInt(e.target.value); borderVal.innerText = `${globalStrokeWidth} px`; updateSVG();
             });
 
+            // Свойства элементов: Цвет и индивидуальное Свечение
             document.getElementById('frame-color').addEventListener('input', (e) => {
-                if (!selectedFrameId) return;
-                const f = frames.find(fr => fr.id === selectedFrameId);
-                f.color = e.target.value;
-                updateFrameDOM(f);
-                scheduleRenderPNG();
+                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId); el.color = e.target.value; updateSVG();
             });
-
-            // Ввод точных размеров в инпуты
+            document.getElementById('glow-slider').addEventListener('input', (e) => {
+                if (!selectedFrameId) return; 
+                const el = elements.find(fr => fr.id === selectedFrameId); 
+                el.glow = parseInt(e.target.value);
+                document.getElementById('glow-val').innerText = el.glow;
+                updateSVG();
+            });
+            
+            // Рамки
             document.getElementById('frame-w').addEventListener('change', (e) => {
-                if (!selectedFrameId) return;
-                const f = frames.find(fr => fr.id === selectedFrameId);
-                let val = parseInt(e.target.value);
-                if (isNaN(val) || val < 10) val = 10; // Минимальный размер
-                f.w = val;
-                e.target.value = val;
-                updateFrameDOM(f);
-                updateSVG(); // Перерисовываем для обновления позиций ручек
-                scheduleRenderPNG();
+                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
+                el.w = Math.max(20, parseInt(e.target.value) || 20); updateSVG();
             });
-
             document.getElementById('frame-h').addEventListener('change', (e) => {
-                if (!selectedFrameId) return;
-                const f = frames.find(fr => fr.id === selectedFrameId);
-                let val = parseInt(e.target.value);
-                if (isNaN(val) || val < 10) val = 10;
-                f.h = val;
-                e.target.value = val;
-                updateFrameDOM(f);
-                updateSVG(); // Перерисовываем
-                scheduleRenderPNG();
+                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
+                el.h = Math.max(20, parseInt(e.target.value) || 20); updateSVG();
+            });
+            document.getElementById('frame-rx').addEventListener('input', (e) => {
+                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
+                el.rx = parseInt(e.target.value) || 0; updateSVG();
+            });
+            
+            // Настройки REC
+            document.getElementById('frame-rec').addEventListener('change', (e) => {
+                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
+                el.rec = e.target.checked; 
+                updatePropsUI();
+                updateSVG();
+            });
+            document.getElementById('frame-rec-pos').addEventListener('change', (e) => {
+                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
+                el.recPos = e.target.value; updateSVG();
+            });
+            document.getElementById('frame-rec-size').addEventListener('input', (e) => {
+                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
+                el.recSize = parseFloat(e.target.value) || 1; updateSVG();
             });
 
-            // Рендер PNG с оптимизацией
-            function scheduleRenderPNG() {
-                clearTimeout(renderTimeout);
-                renderTimeout = setTimeout(executeRenderPNG, 150);
-            }
+            // Текст
+            document.getElementById('frame-text-val').addEventListener('input', (e) => {
+                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
+                el.text = e.target.value || ' '; updateSVG();
+            });
+            document.getElementById('frame-font-family').addEventListener('change', (e) => {
+                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
+                el.fontFamily = e.target.value; updateSVG();
+            });
+            
+            // Взаимодействие между ползунком и полем ввода размера текста
+            document.getElementById('frame-font-size').addEventListener('input', (e) => {
+                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
+                let val = Math.max(10, parseInt(e.target.value) || 40);
+                el.fontSize = val; 
+                document.getElementById('frame-font-size-slider').value = val;
+                updateSVG();
+            });
+            document.getElementById('frame-font-size-slider').addEventListener('input', (e) => {
+                if (!selectedFrameId) return; const el = elements.find(fr => fr.id === selectedFrameId);
+                let val = parseInt(e.target.value);
+                el.fontSize = val; 
+                document.getElementById('frame-font-size').value = val;
+                updateSVG();
+            });
+
+            // Рендер PNG 
+            function scheduleRenderPNG() { clearTimeout(renderTimeout); renderTimeout = setTimeout(executeRenderPNG, 300); }
 
             function executeRenderPNG() {
                 try {
-                    // Скрываем интерактивные элементы перед рендером
-                    const rects = svgOverlay.querySelectorAll('.hud-border');
-                    const originalFills = [];
-                    rects.forEach(r => {
-                        originalFills.push(r.getAttribute('fill'));
-                        r.setAttribute('fill', 'none');
-                    });
-                    
-                    const bgRect = document.getElementById('bg-click-catcher');
-                    if (bgRect) bgRect.style.display = 'none';
-                    const guideG = document.getElementById('guides');
-                    if (guideG) guideG.style.display = 'none';
-                    const handlesG = document.getElementById('handles-group');
-                    if (handlesG) handlesG.style.display = 'none';
+                    const bgRect = document.getElementById('bg-click-catcher'); if (bgRect) bgRect.style.display = 'none';
+                    const guideG = document.getElementById('guides'); if (guideG) guideG.style.display = 'none';
+                    const handlesG = document.getElementById('handles-group'); if (handlesG) handlesG.style.display = 'none';
+                    // Скрываем рамки-перехватчики (прозрачные заливки для удобства перетаскивания)
+                    const grabRects = svgOverlay.querySelectorAll('rect[fill="transparent"]');
+                    grabRects.forEach(r => r.style.display = 'none');
 
                     // Конвертация
                     const svgSerializer = new XMLSerializer();
                     let svgString = svgSerializer.serializeToString(svgOverlay);
                     
-                    // Восстанавливаем элементы
-                    rects.forEach((r, i) => r.setAttribute('fill', originalFills[i]));
+                    // Восстанавливаем DOM
                     if (bgRect) bgRect.style.display = 'block';
                     if (guideG) guideG.style.display = 'block';
                     if (handlesG) handlesG.style.display = 'block';
+                    grabRects.forEach(r => r.style.display = 'block');
 
                     const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
                     const URL = window.URL || window.webkitURL || window;
@@ -661,8 +975,7 @@
                     const image = new Image();
                     image.onload = () => {
                         const canvas = document.createElement('canvas');
-                        canvas.width = 1080;
-                        canvas.height = 1920;
+                        canvas.width = 1080; canvas.height = 1920;
                         const context = canvas.getContext('2d');
                         context.clearRect(0, 0, 1080, 1920);
                         context.drawImage(image, 0, 0, 1080, 1920);
