@@ -1,0 +1,8 @@
+name = "neuro-grafic-api"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "neuro-grafic-db"
+database_id = "ВСТАВЬТЕ-СЮДА-DATABASE-ID-ПОСЛЕ-СОЗДАНИЯ-БАЗЫ"
